@@ -1,0 +1,69 @@
+---
+title: "Untitled"
+author: "Ravin Jayasuriya"
+date: "2025-03-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{r}
+boston_data= read.csv("https://raw.githubusercontent.com/selva86/datasets/master/BostonHousing.csv")
+head(boston_data)
+
+```
+```{r}
+boston_additive = lm(medv~crim+zn+indus+chas+nox+rm+age+dis+rad+tax+ptratio+b+lstat, data= boston_data)
+summary(boston_additive)
+```
+Individual T-test: 
+
+Hypothesis: 
+
+
+Based off the values indus and age do not seem relevent. 
+
+We will verify utilizing a globabal anova f-test: 
+```{r}
+boston_additive_dropped = lm(medv~crim+zn+chas+nox+rm+dis+rad+tax+ptratio+b+lstat, data= boston_data)
+anova(boston_additive, boston_additive_dropped)
+
+```
+Fail to reject null, they are not relevent. 
+
+
+Comparison Of R^2 and RSE 
+
+Chas is a factor. 
+
+
+Final Additive Model: 
+
+```{r}
+confint(boston_additive_dropped)
+```
+
+
