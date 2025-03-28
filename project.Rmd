@@ -29,6 +29,12 @@ author:
 a. Multicolinearity
 b. Additive model
 c. Final Additive model (F-test, anova table)
+Individual T test
+stepwise
+ols_backwards
+ols_forward
+Best Subset
+HigherOrder
 d. R squared & RSE
 e. 
 f. Interaction model
