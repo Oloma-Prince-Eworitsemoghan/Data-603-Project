@@ -1,8 +1,12 @@
 ---
-title: "Untitled"
+title: "DATA 603 Porject - Group 6"
 author: "Ravin Jayasuriya"
 date: "2025-03-28"
-output: html_document
+output: 
+  pdf_document:
+    latex_engine: xelatex
+author: 
+  - "Joshua Ogunbo"
 ---
 
 ```{r setup, include=FALSE}
