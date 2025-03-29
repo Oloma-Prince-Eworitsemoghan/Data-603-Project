@@ -120,9 +120,22 @@ d. Interaction model
 interaction_model = lm(formula = medv ~ (crim + zn + factor(chas) + nox + rm+ dis + rad + tax + ptratio + b + lstat)^2, data = boston_data)
 summary(interaction_model)
 ```
+
+
 ```{r}
-lm(formula = medv ~ crim + zn + factor(chas) + nox + rm+ dis + rad + tax + ptratio + b + lstat+ crim:chas + crim:nox + crim:rm + crim:dis + crim:rad + crim:tax + crim:b + crim:lstat + zn:dis + zn:tax + chas:nox + chas:rm + chas:lstat + nox:tax + rm:ptratio + rm:b + rm:lstat + dis:rad + dis:lstat + b:lstat)
+reduced_interaction_model = lm(formula = medv ~ crim + zn + factor(chas) + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas + crim:nox + crim:rm+ crim:dis +crim:rad+ crim:tax+ crim:b +crim:lstat + zn:dis + zn:tax + chas:nox +chas:rm +chas:lstat + nox:rad + nox:tax+ rm:dis + rm:ptratio+ rm:b+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(reduced_interaction_model)
 ```
+```{r}
+reduced_interaction_model2 = lm(formula = medv ~ crim + zn + factor(chas) + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + nox:tax+ rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(reduced_interaction_model2)
+```
+```{r}
+reduced_interaction_model3 = lm(formula = medv ~ crim + zn + factor(chas) + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(reduced_interaction_model3)
+```
+
+
 
 
 
