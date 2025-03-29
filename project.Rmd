@@ -11,16 +11,23 @@ author:
 
 1.1 MOTIVATION
 
-The housing market has been fairly inconsistent lately in various regions around the world. Prices have skyrocketed and it has become very difficult for young home owners to purchase homes. We are looking into this housing data in boston to gain an idea of what factors are considered in the valuation of houses and what prospective homeowners should look out for when trying to buy a house.
+The housing market has been fairly inconsistent lately in various regions around the world. Prices have skyrocketed and it has become very difficult for young home owners to purchase homes. We are looking into this housing data in Boston to gain an idea of what factors are considered in the valuation of houses and what prospective homeowners should look out for when trying to buy a house.
+
 1.1.1 Context
 
-This project would explore the relationships between housing prices in Boston and various features that may influence them.
+The domains for this project is real estate analytics, urban economics, and  urban planning. This project would explore the relationships between housing prices in Boston and various features that may influence them. Our dataset was obtained from a census survey conducted in the 1970s. We are planning on running several different regression procedures to get a better understanding of how our dependent variable Median Value (measured in thousands) is effected by the 13 independent variables. 
 
 1.1.2 Problem
 
+The problem we hope to address is figuring out which variables are most influential in predicting the median value. We have 13 different variables, and we do not know at this time if they are all relevant.The problem would be addressed by exploring the dataset to determine the features that significantly influence housing prices. The project will also provide insights into how the identified significant variables interact with the prices.
+
+Some of the data/visual analytics we aim to display are:
+>pairs-plot 
+>gg plot2 
 
 
 1.1.3 Challenges
+
 
 1.2 OBJECTIVES
 
@@ -37,27 +44,79 @@ Our goal is to develop a multiple linear regression model that accurately predic
 2.2 Approach
 2.3 Workflow
 
-a. Multicolinearity
 ```{r}
-ggplot(model, aes(x=.fitted, y=.resid)) +
-geom_point() +geom_smooth()+
-geom_hline(yintercept = 0)
-# Example code for determining linearity
-#if there is a pattern, then there is a linearity and we have to transform our data.
+library(mctest)
+library(ggplot2)
+library(GGally)
+library(car)
+```
+
+
+a. Testing for Multicolinearity
+```{r}
+boston_data= read.csv("./BostonHousing.csv")
+
+
+boston_additive = lm(medv~crim+zn+indus+chas+nox+rm+age+dis+rad+tax+ptratio+b+lstat, data= boston_data)
+
+
+imcdiag(boston_additive, method = "VIF")
+
 
 ```
+Based off of our results. Multicollinearity was not detected for any of the variables. 
+
+
 
 b. Additive model
 ```{r}
-boston_data= read.csv("./BostonHousing.csv")
-head(boston_data)
+summary(boston_additive)
 
 ```
+Using and individual t-test with the hypothesis: 
+
+$H_0 = \beta_1\ = \beta_2\ = \beta_p\ =0$
+
+$H_A = at least one \beta_i\ is not zero (i=1,2,...p)$
+
+The p-value for indus and age are  0.738288 and 0.958229, respectively. Because the p-value is greater than our $\alpha$ of 0.05, we fail to reject the null and beta values for these variables are determined to be insignificant.
+
 ```{r}
-boston_additive = lm(medv~crim+zn+indus+chas+nox+rm+age+dis+rad+tax+ptratio+b+lstat, data= boston_data)
-summary(boston_additive)
+reduced_additive_model = lm(formula = medv ~ crim + zn + chas + nox + rm+ dis + rad + tax + ptratio + b + lstat, data = boston_data)
+summary(reduced_additive_model)
 ```
+All of our variables seem to be significant. 
+
+We will verify that dropping these variables makes sense using a global f-test/anova. 
+
+```{r}
+anova(reduced_additive_model,boston_additive)
+```
+The hypothesis for the f-test is: 
+
+For the f test the hypothesis is:
+
+Hypotheses
+$$
+\begin{aligned}
+H_0&:\beta_i=0\\
+H_a&:\beta_i\neq0 (i=1,2,...,p)
+\end{aligned}
+$$
+
+Since the p_value is 0.9443 which is greater than 0.05, this indicates that we do not have enough evidence against the null hypothesis. Therefore, we can conclude that the reduced model is preferred.
+
+
+
 c. Final Additive model (F-test, anova table)
+
+Our final additive model is: 
+
+$\hat{USAGE} = 5.891627 + 0.040207PROD+ 0.168673TEMP - 0.070990HOUR$
+
+
+
+
 Individual T test
 stepwise
 ols_backwards
@@ -82,8 +141,7 @@ Based off the values indus and age do not seem relevent.
 
 We will verify utilizing a globabal anova f-test: 
 ```{r}
-boston_additive_dropped = lm(medv~crim+zn+chas+nox+rm+dis+rad+tax+ptratio+b+lstat, data= boston_data)
-anova(boston_additive, boston_additive_dropped)
+
 
 ```
 Fail to reject null, they are not relevent. 
