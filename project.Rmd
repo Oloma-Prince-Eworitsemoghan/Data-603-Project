@@ -55,14 +55,12 @@ library(car)
 a. Testing for Multicolinearity
 ```{r}
 boston_data= read.csv("./BostonHousing.csv")
+head(boston_data)
 
-
-boston_additive = lm(medv~crim+zn+indus+chas+nox+rm+age+dis+rad+tax+ptratio+b+lstat, data= boston_data)
+boston_additive = lm(medv~crim+zn+indus+factor(chas)+nox+rm+age+dis+rad+tax+ptratio+b+lstat, data= boston_data)
 
 
 imcdiag(boston_additive, method = "VIF")
-
-
 ```
 Based off of our results. Multicollinearity was not detected for any of the variables. 
 
@@ -82,9 +80,10 @@ $H_A = at least one \beta_i\ is not zero (i=1,2,...p)$
 The p-value for indus and age are  0.738288 and 0.958229, respectively. Because the p-value is greater than our $\alpha$ of 0.05, we fail to reject the null and beta values for these variables are determined to be insignificant.
 
 ```{r}
-reduced_additive_model = lm(formula = medv ~ crim + zn + chas + nox + rm+ dis + rad + tax + ptratio + b + lstat, data = boston_data)
+reduced_additive_model = lm(formula = medv ~ crim + zn + factor(chas) + nox + rm+ dis + rad + tax + ptratio + b + lstat, data = boston_data)
 summary(reduced_additive_model)
 ```
+
 All of our variables seem to be significant. 
 
 We will verify that dropping these variables makes sense using a global f-test/anova. 
@@ -112,12 +111,18 @@ c. Final Additive model (F-test, anova table)
 
 Our final additive model is: 
 
-$\hat{USAGE} = 5.891627 + 0.040207PROD+ 0.168673TEMP - 0.070990HOUR$
+$\hat{medv} = 36.341145 - 0.108413crim_{i} +0.045845zn_{i} +2.718716chas_{i} -17.376023X_{nox} + 3.801579X_{rm} -1.492711X_{dis} + 0.299608X_{rad} -0.011778X_{tax} -0.946525X_{ptratio} +0.009291X_{b} - 0.522553X_{lstat}$
+
+
+d. Interaction model
+
+```{r}
+interaction_model = lm(formula = medv ~ (crim + zn + factor(chas) + nox + rm+ dis + rad + tax + ptratio + b + lstat)^2, data = boston_data)
+summary(interaction_model)
+```
 
 
 
-
-Individual T test
 stepwise
 ols_backwards
 ols_forward
@@ -125,7 +130,7 @@ Best Subset
 HigherOrder
 d. R squared & RSE
 e. 
-f. Interaction model
+
 g.  
 
 2.4 Contributions
