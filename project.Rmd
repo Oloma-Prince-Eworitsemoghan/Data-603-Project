@@ -111,7 +111,7 @@ c. Final Additive model (F-test, anova table)
 
 Our final additive model is: 
 
-$\hat{medv} = 36.341145 - 0.108413crim_{i} +0.045845zn_{i} +2.718716chas_{i} -17.376023X_{nox} + 3.801579X_{rm} -1.492711X_{dis} + 0.299608X_{rad} -0.011778X_{tax} -0.946525X_{ptratio} +0.009291X_{b} - 0.522553X_{lstat}$
+$\hat{medv} = 36.341145 - 0.108413crim_{i} +0.045845zn_{i} +2.718716chas_{i} -17.376023nox_{i} + 3.801579rm_{i} -1.492711dis_{i} + 0.299608rad_{i} -0.011778tax_{i} -0.946525ptratio_{i} +0.009291b_{i} - 0.522553lstat_{i}$
 
 
 d. Interaction model
