@@ -49,6 +49,7 @@ library(mctest)
 library(ggplot2)
 library(GGally)
 library(car)
+library(olsrr)
 ```
 
 
@@ -56,20 +57,27 @@ a. Testing for Multicolinearity
 ```{r}
 boston_data= read.csv("./BostonHousing.csv")
 head(boston_data)
+```
 
-boston_additive = lm(medv~crim+zn+indus+factor(chas)+nox+rm+age+dis+rad+tax+ptratio+b+lstat, data= boston_data)
 
+```{r}
+boston_additive$chas[which(boston_additive$chas==0)] = "No"
+boston_additive$chas[which(boston_additive$chas==1)] = "Yes"
+```
+
+
+```{r}
+boston_additive = lm(medv~crim+zn+indus+chas+nox+rm+age+dis+rad+tax+ptratio+b+lstat, data= boston_data)
 
 imcdiag(boston_additive, method = "VIF")
 ```
-Based off of our results. Multicollinearity was not detected for any of the variables. 
+Based off of our results. Multicolinearity was not detected for any of the variables. 
 
 
 
 b. Additive model
 ```{r}
 summary(boston_additive)
-
 ```
 Using and individual t-test with the hypothesis: 
 
@@ -105,7 +113,10 @@ $$
 
 Since the p_value is 0.9443 which is greater than 0.05, this indicates that we do not have enough evidence against the null hypothesis. Therefore, we can conclude that the reduced model is preferred.
 
-
+```{r}
+stepmod=ols_step_both_p(boston_additive,p_enter = 0.05, p_remove = 0.1, details=FALSE)
+summary(stepmod$model)
+```
 
 c. Final Additive model (F-test, anova table)
 
@@ -117,23 +128,159 @@ $\hat{medv} = 36.341145 - 0.108413crim_{i} +0.045845zn_{i} +2.718716chas_{i} -17
 d. Interaction model
 
 ```{r}
-interaction_model = lm(formula = medv ~ (crim + zn + factor(chas) + nox + rm+ dis + rad + tax + ptratio + b + lstat)^2, data = boston_data)
+interaction_model = lm(formula = medv ~ (crim + zn + chas + nox + rm+ dis + rad + tax + ptratio + b + lstat)^2, data = boston_data)
 summary(interaction_model)
 ```
 
 
 ```{r}
-reduced_interaction_model = lm(formula = medv ~ crim + zn + factor(chas) + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas + crim:nox + crim:rm+ crim:dis +crim:rad+ crim:tax+ crim:b +crim:lstat + zn:dis + zn:tax + chas:nox +chas:rm +chas:lstat + nox:rad + nox:tax+ rm:dis + rm:ptratio+ rm:b+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+reduced_interaction_model = lm(formula = medv ~ crim + zn + chas + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas + crim:nox + crim:rm+ crim:dis +crim:rad+ crim:tax+ crim:b +crim:lstat + zn:dis + zn:tax + chas:nox +chas:rm +chas:lstat + nox:rad + nox:tax+ rm:dis + rm:ptratio+ rm:b+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(reduced_interaction_model)
 ```
+
 ```{r}
-reduced_interaction_model2 = lm(formula = medv ~ crim + zn + factor(chas) + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + nox:tax+ rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+reduced_interaction_model2 = lm(formula = medv ~ crim + zn + chas + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + nox:tax+ rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(reduced_interaction_model2)
 ```
+
+
 ```{r}
-reduced_interaction_model3 = lm(formula = medv ~ crim + zn + factor(chas) + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+reduced_interaction_model3 = lm(formula = medv ~ crim + zn + chas + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(reduced_interaction_model3)
 ```
+
+
+```{r}
+anova(reduced_interaction_model3,interaction_model)
+```
+
+```{r}
+stepmodinter=ols_step_both_p(interaction_model,p_enter = 0.05, p_remove = 0.1, details=FALSE)
+summary(stepmodinter$model)
+```
+
+```{r}
+anova(stepmodinter$model,interaction_model)
+```
+
+
+Based on the summary above, the p-value is $8.242e-12<0.05$, suggesting the null hypothesis should be rejected. Also, the adjusted $R^2_{adj}$ and RSE of the full interaction model are 0.888 and 3.078 respectively, while the adjusted $R^2_{adj}$ and RSE of the reduced interaction model are 0.8627 and 3.408 respectively. 
+
+These suggest the full interaction model should be preferred. However, the full interaction model has a number of insignificant interactions, while the reduced interaction model has only significant interactions. Even though the anova test, adjusted $R^2_{adj}$ and RSE suggest preferring the full interaction model, there isn't a major difference between the adjusted $R^2_{adj}$ and RSE of the two models.
+
+We would choose the reduced model because it retains all significant interactions while eliminating insignificant ones, ensuring better interpretability and avoiding unnecessary complexity without a substantial loss in explanatory power.
+
+
+
+# HIGHER ORDER EXPLORATION
+
+```{r}
+library(GGally)
+```
+
+
+```{r}
+higher_order_data = data.frame(boston_data$medv, boston_data$crim, boston_data$zn, boston_data$nox, boston_data$rm, boston_data$dis, boston_data$rad, boston_data$tax, boston_data$ptratio, boston_data$b, boston_data$lstat)
+
+#ggpairs(higher_order_data,lower = list(continuous = "smooth_loess", combo = "facethist", discrete = "facetbar", na = "na"))
+
+ggpairs(higher_order_data,lower = list(continuous = wrap("smooth_loess", color = "red"), combo = "facethist", discrete = "facetbar", na = "na"))
+```
+
+It looks like the variables that might be worth exploring for possible higher order relationships with medv are crim, zn, nox, rm, dis, rad, tax, lstat
+
+
+```{r}
+higher_order_crim_2 = lm(formula = medv ~ crim + I(crim^2) + zn + chas + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_crim_2)
+```
+
+```{r}
+higher_order_crim_3 = lm(formula = medv ~ crim + I(crim^2) + I(crim^3) + zn + chas + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_crim_3)
+```
+
+```{r}
+higher_order_zn_2 = lm(formula = medv ~ crim + zn + I(zn^2) + chas + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_zn_2)
+```
+
+```{r}
+higher_order_nox_2 = lm(formula = medv ~ crim + zn + chas + nox + I(nox^2) + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_nox_2)
+```
+
+```{r}
+higher_order_nox_3 = lm(formula = medv ~ crim + zn + chas + nox + I(nox^2) + I(nox^3) + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_nox_3)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+ggsave("bigger_plot.png", plot = p, width = 16, height = 12, dpi = 300)
+```
+
+
 
 
 
@@ -160,7 +307,7 @@ Hypothesis:
 
 Based off the values indus and age do not seem relevent. 
 
-We will verify utilizing a globabal anova f-test: 
+We will verify utilizing a global anova f-test: 
 ```{r}
 
 
@@ -178,6 +325,8 @@ Final Additive Model:
 ```{r}
 confint(boston_additive_dropped)
 ```
+
+
 
 4. Conclusion and Discussion
 4.1 Approach
