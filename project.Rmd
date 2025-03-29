@@ -61,8 +61,8 @@ head(boston_data)
 
 
 ```{r}
-boston_additive$chas[which(boston_additive$chas==0)] = "No"
-boston_additive$chas[which(boston_additive$chas==1)] = "Yes"
+boston_data$chas[which(boston_data$chas==0)] = "No"
+boston_data$chas[which(boston_data$chas==1)] = "Yes"
 ```
 
 
@@ -180,9 +180,7 @@ library(GGally)
 
 
 ```{r}
-higher_order_data = data.frame(boston_data$medv, boston_data$crim, boston_data$zn, boston_data$nox, boston_data$rm, boston_data$dis, boston_data$rad, boston_data$tax, boston_data$ptratio, boston_data$b, boston_data$lstat)
-
-#ggpairs(higher_order_data,lower = list(continuous = "smooth_loess", combo = "facethist", discrete = "facetbar", na = "na"))
+higher_order_data = data.frame(boston_data$medv, boston_data$crim, boston_data$zn, boston_data$chas, boston_data$nox, boston_data$rm, boston_data$dis, boston_data$rad, boston_data$tax, boston_data$ptratio, boston_data$b, boston_data$lstat)
 
 ggpairs(higher_order_data,lower = list(continuous = wrap("smooth_loess", color = "red"), combo = "facethist", discrete = "facetbar", na = "na"))
 ```
@@ -225,11 +223,10 @@ summary(higher_order_rm_2)
 higher_order_rm_3 = lm(formula = medv ~ crim + zn + chas + nox + rm+ I(rm^2)+ I(rm^3) + dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_rm_3)
 ```
-higher_order_rm_2
 
 
 ```{r}
-higher_order_dis_2 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis I(dis^2)+ rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+higher_order_dis_2 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + I(dis^2)+ rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_dis_2)
 ```
 
@@ -252,21 +249,6 @@ higher_order_tax_2 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad
 summary(higher_order_tax_2)
 ```
 
-```{r}
-higher_order_tax_3 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + I(tax^2)+ I(tax^3)+ ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
-summary(higher_order_tax_3)
-```
-
-
-```{r}
-higher_order_tax_4 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + I(tax^2)+ I(tax^3)+ I(tax^4)+ ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
-summary(higher_order_tax_4)
-```
-
-```{r}
-higher_order_tax_5 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + I(tax^2)+ I(tax^3)+ I(tax^4)+ I(tax^5)+ ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
-summary(higher_order_tax_5)
-```
 
 ```{r}
 higher_order_lstat_2 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + ptratio + b + lstat + I(lstat^2)+ crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
@@ -296,26 +278,80 @@ higher_order_lstat_6 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + r
 summary(higher_order_lstat_6)
 ```
 
+
 ```{r}
-final_higher_order_interaction_model = lm(formula = medv ~ crim + I(crim^2)+ zn + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + I(tax^2)+ I(tax^3)+ I(tax^4)+ ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5)+ crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
-summary(final_higher_order_interaction_model)
+higher_order_interaction_model = lm(formula = medv ~ crim + I(crim^2)+ zn + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5)+ crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_interaction_model)
 ```
 
 
+```{r}
+higher_order_interaction_model_2 = lm(formula = medv ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_interaction_model_2)
+```
+
+# Linearity
+
+```{r}
+ggplot(higher_order_interaction_model_2, aes(x=.fitted, y=.resid)) +
+geom_point() +geom_smooth()+
+geom_hline(yintercept = 0)
+```
 
 
+## Equal variance
+
+```{r}
+ggplot(higher_order_interaction_model_2, aes(x=.fitted, y=.resid)) +
+geom_point(colour = "purple") +
+geom_hline(yintercept = 0) +
+geom_smooth(colour = "green4")+
+ggtitle("Residual plot: Residual vs Fitted values")
+```
 
 
+```{r}
+ggplot(higher_order_interaction_model_2, aes(x=.fitted, y=sqrt(abs(.stdresid)))) +
+geom_point(colour = "purple") +
+geom_hline(yintercept = 0) +
+geom_smooth( colour = "green4")+
+ggtitle("Scale-Location plot : Standardized Residual vs Fitted values")
+```
+
+Based on these plots we can see that the scale-location plot is quite horizontal, and there is not any funneling in the residual plot
+
+```{r}
+library(lmtest)
+bptest(higher_order_interaction_model_2)
+```
 
 
+## NORMALITY
+
+```{r}
+ggplot(data=boston_data, aes(residuals(higher_order_interaction_model_2))) +
+geom_histogram(breaks = seq(-1,1,by=0.1), col="green3", fill="green4") +
+labs(title="Histogram for residuals") +
+labs(x="residuals", y="Count")
+```
 
 
+```{r}
+ggplot(boston_data, aes(sample=higher_order_interaction_model_2$residuals)) +
+stat_qq() +
+stat_qq_line()
+```
 
 
+```{r}
+hist(residuals(higher_order_interaction_model_2))
+plot(higher_order_interaction_model_2, which=2)
+```
 
-
-
-
+```{r}
+#Testing for Normality
+shapiro.test(residuals(higher_order_interaction_model_2))
+```
 
 
 
