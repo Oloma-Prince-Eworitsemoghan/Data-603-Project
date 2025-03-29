@@ -216,29 +216,90 @@ summary(higher_order_nox_3)
 ```
 
 
+```{r}
+higher_order_rm_2 = lm(formula = medv ~ crim + zn + chas + nox + rm+ I(rm^2)+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_rm_2)
+```
+
+```{r}
+higher_order_rm_3 = lm(formula = medv ~ crim + zn + chas + nox + rm+ I(rm^2)+ I(rm^3) + dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_rm_3)
+```
+higher_order_rm_2
+
+
+```{r}
+higher_order_dis_2 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis I(dis^2)+ rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_dis_2)
+```
 
 
 
+```{r}
+higher_order_dis_3 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + I(dis^2)+ I(dis^3)+ rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_dis_3)
+```
 
 
+```{r}
+higher_order_rad_2 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + I(rad^2)+ tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_rad_2)
+```
 
 
+```{r}
+higher_order_tax_2 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + I(tax^2)+ ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_tax_2)
+```
+
+```{r}
+higher_order_tax_3 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + I(tax^2)+ I(tax^3)+ ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_tax_3)
+```
 
 
+```{r}
+higher_order_tax_4 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + I(tax^2)+ I(tax^3)+ I(tax^4)+ ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_tax_4)
+```
+
+```{r}
+higher_order_tax_5 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + I(tax^2)+ I(tax^3)+ I(tax^4)+ I(tax^5)+ ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_tax_5)
+```
+
+```{r}
+higher_order_lstat_2 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + ptratio + b + lstat + I(lstat^2)+ crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_lstat_2)
+```
 
 
+```{r}
+higher_order_lstat_3 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_lstat_3)
+```
+
+```{r}
+higher_order_lstat_4 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_lstat_4)
+```
 
 
+```{r}
+higher_order_lstat_5 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5)+ crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_lstat_5)
+```
 
 
+```{r}
+higher_order_lstat_6 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5)+ I(lstat^6)+ crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_lstat_6)
+```
 
-
-
-
-
-
-
-
+```{r}
+final_higher_order_interaction_model = lm(formula = medv ~ crim + I(crim^2)+ zn + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + I(tax^2)+ I(tax^3)+ I(tax^4)+ ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5)+ crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(final_higher_order_interaction_model)
+```
 
 
 
