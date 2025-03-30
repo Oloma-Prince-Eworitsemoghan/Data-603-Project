@@ -50,6 +50,7 @@ library(ggplot2)
 library(GGally)
 library(car)
 library(olsrr)
+library(lmtest)
 ```
 
 
@@ -321,9 +322,185 @@ ggtitle("Scale-Location plot : Standardized Residual vs Fitted values")
 Based on these plots we can see that the scale-location plot is quite horizontal, and there is not any funneling in the residual plot
 
 ```{r}
-library(lmtest)
 bptest(higher_order_interaction_model_2)
 ```
+
+```{r}
+higher_order_interaction_model_log = lm(formula = log(medv) ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_interaction_model_log)
+```
+
+```{r}
+bptest(higher_order_interaction_model_log)
+```
+```{r}
+#Testing for Normality
+shapiro.test(residuals(higher_order_interaction_model_log))
+```
+
+
+```{r}
+higher_order_interaction_model_log_2 = lm(formula = log(medv) ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ dis:rad + dis:lstat, data = boston_data)
+summary(higher_order_interaction_model_log_2)
+```
+
+```{r}
+bptest(higher_order_interaction_model_log_2)
+```
+
+```{r}
+#Testing for Normality
+shapiro.test(residuals(higher_order_interaction_model_log_2))
+```
+
+
+```{r}
+higher_order_interaction_model_log_3 = lm(formula = log(medv) ~ crim + I(crim^2) + chas + nox+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio + dis:lstat, data = boston_data)
+summary(higher_order_interaction_model_log_3)
+```
+
+```{r}
+bptest(higher_order_interaction_model_log_3)
+```
+
+```{r}
+#Testing for Normality
+shapiro.test(residuals(higher_order_interaction_model_log_3))
+```
+
+
+
+```{r}
+library(MASS)
+
+bc=boxcox(higher_order_interaction_model_2,lambda=seq(-1,1))
+```
+
+
+```{r}
+#extract best lambda
+bestlambda=bc$x[which(bc$y==max(bc$y))]
+bestlambda
+```
+
+
+```{r}
+higher_order_interaction_model_2_box = lm(formula = (((medv^0.4949495)-1)/0.4949495) ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_interaction_model_2_box)
+```
+
+```{r}
+bptest(higher_order_interaction_model_2_box)
+```
+
+
+```{r}
+#Testing for Normality
+shapiro.test(residuals(higher_order_interaction_model_2_box))
+```
+
+
+## Weighted Least Squares Regression Method
+
+```{r}
+resid = resid(higher_order_interaction_model_2)
+```
+
+```{r}
+resid_model = lm(formula = log(resid^2) ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5), data = boston_data)
+```
+
+```{r}
+fitted_var = exp(fitted(resid_model))
+weights = 1 / fitted_var
+```
+
+
+```{r}
+higher_order_interaction_model_wls = lm(formula = medv ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ dis:rad + dis:lstat+ b:lstat, data = boston_data, weights = weights)
+summary(higher_order_interaction_model_wls)
+```
+
+
+```{r}
+bptest(higher_order_interaction_model_wls)
+```
+
+
+```{r}
+#Testing for Normality
+shapiro.test(residuals(higher_order_interaction_model_wls))
+```
+
+
+
+
+
+```{r}
+higher_order_interaction_model_wls_2 = lm(formula = medv ~ crim + I(crim^2) + chas + nox + rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio + dis:lstat+ b:lstat, data = boston_data, weights = weights)
+summary(higher_order_interaction_model_wls_2)
+```
+
+
+```{r}
+higher_order_interaction_model_wls_3 = lm(formula = medv ~ crim + I(crim^2) + chas + nox + rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + rm:dis + rm:ptratio + dis:lstat+ b:lstat, data = boston_data, weights = weights)
+summary(higher_order_interaction_model_wls_3)
+```
+
+```{r}
+bptest(higher_order_interaction_model_wls_3)
+```
+
+```{r}
+#Testing for Normality
+shapiro.test(residuals(higher_order_interaction_model_wls_3))
+```
+
+# CONFIRM LINEARITY ASSUMPTION IS STILL GOOD
+
+```{r}
+ggplot(higher_order_interaction_model_wls_3, aes(x=.fitted, y=.resid)) +
+geom_point(colour = "purple") +
+geom_hline(yintercept = 0) +
+geom_smooth(colour = "green4")+
+ggtitle("Residual plot: Residual vs Fitted values")
+```
+
+```{r}
+ggplot(higher_order_interaction_model_wls_3, aes(x=.fitted, y=.resid)) +
+geom_point() +geom_smooth()+
+geom_hline(yintercept = 0)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## NORMALITY
@@ -338,8 +515,7 @@ labs(x="residuals", y="Count")
 
 ```{r}
 ggplot(boston_data, aes(sample=higher_order_interaction_model_2$residuals)) +
-stat_qq() +
-stat_qq_line()
+stat_qq() + stat_qq_line()
 ```
 
 
@@ -352,6 +528,57 @@ plot(higher_order_interaction_model_2, which=2)
 #Testing for Normality
 shapiro.test(residuals(higher_order_interaction_model_2))
 ```
+
+## OUTLIERS
+
+
+```{r}
+plot(higher_order_interaction_model_2, 5)
+```
+
+Based on this plot everything looks okay
+Now I will look at the cooks distance and leverages plots
+
+```{r}
+boston_data[cooks.distance(higher_order_interaction_model_2)>0.5,]
+```
+
+
+```{r}
+plot(higher_order_interaction_model_2,pch=18,col="red",which=c(4))
+```
+
+
+```{r}
+lev=hatvalues(higher_order_interaction_model_2)
+p = length(coef(higher_order_interaction_model_2))
+n = nrow(boston_data)
+outlier2p = lev[lev>(2*p/n)]
+outlier3p = lev[lev>(3*p/n)]
+print("h_I>2p/n, outliers are")
+
+print(outlier2p)
+```
+
+
+
+```{r}
+print("h_I>3p/n, outliers are")
+
+print(outlier3p)
+```
+
+```{r}
+plot(rownames(boston_data),lev, main = "Leverage in Boston Housing Dataset", xlab="observation", ylab = "Leverage Value")
+abline(h = 2 *p/n, lty = 1)
+abline(h = 3 *p/n, lty = 1)
+```
+
+
+
+It appears we have high leverage points but none of them appear to be particularly influential (no points with a concerning cooks distance). It appears we do not have any outliers that could pose problems.
+
+
 
 
 
