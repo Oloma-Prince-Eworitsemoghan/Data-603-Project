@@ -54,6 +54,7 @@ library(lmtest)
 ```
 
 
+
 a. Testing for Multicolinearity
 ```{r}
 boston_data= read.csv("./BostonHousing.csv")
@@ -73,6 +74,17 @@ boston_additive = lm(medv~crim+zn+indus+chas+nox+rm+age+dis+rad+tax+ptratio+b+ls
 imcdiag(boston_additive, method = "VIF")
 ```
 Based off of our results. Multicolinearity was not detected for any of the variables. 
+
+```{r}
+library(knitr)
+anova_table <- data.frame(
+  "Variable Name" = c("crim","zn","indus","chas","nox","rm","age","dis","rad","tax","ptratio","b","lstat"),
+  "VIF" = c(1.7922,2.2928,3.9916,1.0740,4.3937,1.9337,3.1008,3.9559,7.4845,9.0086,1.7991,1.3485,2.9415),
+  "Detection" = c(0,0,0,0,0,0,0,0,0,0,0,0,0)
+)
+kable(anova_table, caption = "TEST FOR MULTICOLINEARITY")
+```
+
 
 
 
@@ -98,7 +110,8 @@ All of our variables seem to be significant.
 We will verify that dropping these variables makes sense using a global f-test/anova. 
 
 ```{r}
-anova(reduced_additive_model,boston_additive)
+table1 = data.frame((anova(reduced_additive_model,boston_additive)))
+print(table1)
 ```
 The hypothesis for the f-test is: 
 
@@ -152,7 +165,8 @@ summary(reduced_interaction_model3)
 
 
 ```{r}
-anova(reduced_interaction_model3,interaction_model)
+table2= data.frame((anova(reduced_interaction_model3,interaction_model)))
+print(table2)
 ```
 
 ```{r}
@@ -161,7 +175,8 @@ summary(stepmodinter$model)
 ```
 
 ```{r}
-anova(stepmodinter$model,interaction_model)
+table3 = data.frame((anova(stepmodinter$model,interaction_model)))
+print(table3)
 ```
 
 
