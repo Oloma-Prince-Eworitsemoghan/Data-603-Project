@@ -33,6 +33,7 @@ suppressPackageStartupMessages({
   library(olsrr)
   library(lmtest)
   library(knitr)
+  library(MASS)
   })
 ```
 
@@ -399,16 +400,7 @@ In the Boston housing dataset, the subjects were not related to time, space, or 
 
 ## Equal Variance Assumption
 
-```{r}
-ggplot(higher_order_interaction_model_2, aes(x=.fitted, y=.resid)) +
-geom_point(colour = "purple") +
-geom_hline(yintercept = 0) +
-geom_smooth(colour = "green4")+
-ggtitle("Residual plot: Residual vs Fitted values")
-```
-
-Another thing we can look at is the scale-location plot between fitted values and standardized residuals to show if residuals are spread equally along the ranges of predictors.
-
+The residuals plot in the linearity assumption section indicates a smooth fit to the residuals, which is good. In addition to the residuals plot, a scale-location plot between fitted values and standardized residuals was also plotted to show if the residuals are spread equally along the ranges of predictors
 
 ```{r}
 ggplot(higher_order_interaction_model_2, aes(x=.fitted, y=sqrt(abs(.stdresid)))) +
@@ -418,194 +410,33 @@ geom_smooth( colour = "green4")+
 ggtitle("Scale-Location plot : Standardized Residual vs Fitted values")
 ```
 
-Based on the plot, we can see that the scale-location plot is quite horizontal, and there is not any funneling in the residual plot
+Based on the plot, we can see that the scale-location plot is quite horizontal, and there is not any funneling in the residual plot, indicating equal variance.
 
+The Breusch-Pagan test was then run as a more formal way to assess if we have homo/heteroscedasticity using the following hypotheses:
 
-The Br
+$$
+\begin{aligned}
+H_0:&\mbox{ heteroscedasticity is not present (homoscedasticity)}\\
+H_a~:&\mbox{ heteroscedasticity is present} \\
+\end{aligned}
+$$
 
 ```{r}
 bptest(higher_order_interaction_model_2)
 ```
 
-```{r}
-higher_order_interaction_model_log = lm(formula = log(medv) ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
-summary(higher_order_interaction_model_log)
-```
+The p-value of the Breusch-Pagan test is less than 0.05 (2.505e-05), so we fail to reject the null hypothesis, indicating we do have heteroscedasticity. 
 
-```{r}
-bptest(higher_order_interaction_model_log)
-```
-```{r}
-#Testing for Normality
-shapiro.test(residuals(higher_order_interaction_model_log))
-```
-
-
-```{r}
-higher_order_interaction_model_log_2 = lm(formula = log(medv) ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ dis:rad + dis:lstat, data = boston_data)
-summary(higher_order_interaction_model_log_2)
-```
-
-```{r}
-bptest(higher_order_interaction_model_log_2)
-```
-
-```{r}
-#Testing for Normality
-shapiro.test(residuals(higher_order_interaction_model_log_2))
-```
-
-
-```{r}
-higher_order_interaction_model_log_3 = lm(formula = log(medv) ~ crim + I(crim^2) + chas + nox+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio + dis:lstat, data = boston_data)
-summary(higher_order_interaction_model_log_3)
-```
-
-```{r}
-bptest(higher_order_interaction_model_log_3)
-```
-
-```{r}
-#Testing for Normality
-shapiro.test(residuals(higher_order_interaction_model_log_3))
-```
-
-
-
-```{r}
-library(MASS)
-
-bc=boxcox(higher_order_interaction_model_2,lambda=seq(-1,1))
-```
-
-
-```{r}
-#extract best lambda
-bestlambda=bc$x[which(bc$y==max(bc$y))]
-bestlambda
-```
-
-
-```{r}
-higher_order_interaction_model_2_box = lm(formula = (((medv^0.4949495)-1)/0.4949495) ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
-summary(higher_order_interaction_model_2_box)
-```
-
-```{r}
-bptest(higher_order_interaction_model_2_box)
-```
-
-
-```{r}
-#Testing for Normality
-shapiro.test(residuals(higher_order_interaction_model_2_box))
-```
-
-
-## Weighted Least Squares Regression Method
-
-```{r}
-resid = resid(higher_order_interaction_model_2)
-```
-
-```{r}
-resid_model = lm(formula = log(resid^2) ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5), data = boston_data)
-```
-
-```{r}
-fitted_var = exp(fitted(resid_model))
-weights = 1 / fitted_var
-```
-
-
-```{r}
-higher_order_interaction_model_wls = lm(formula = medv ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ dis:rad + dis:lstat+ b:lstat, data = boston_data, weights = weights)
-summary(higher_order_interaction_model_wls)
-```
-
-
-```{r}
-bptest(higher_order_interaction_model_wls)
-```
-
-
-```{r}
-#Testing for Normality
-shapiro.test(residuals(higher_order_interaction_model_wls))
-```
-
-
-
-
-
-```{r}
-higher_order_interaction_model_wls_2 = lm(formula = medv ~ crim + I(crim^2) + chas + nox + rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio + dis:lstat+ b:lstat, data = boston_data, weights = weights)
-summary(higher_order_interaction_model_wls_2)
-```
-
-
-```{r}
-higher_order_interaction_model_wls_3 = lm(formula = medv ~ crim + I(crim^2) + chas + nox + rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + rm:dis + rm:ptratio + dis:lstat+ b:lstat, data = boston_data, weights = weights)
-summary(higher_order_interaction_model_wls_3)
-```
-
-```{r}
-bptest(higher_order_interaction_model_wls_3)
-```
-
-```{r}
-#Testing for Normality
-shapiro.test(residuals(higher_order_interaction_model_wls_3))
-```
-
-# CONFIRM LINEARITY ASSUMPTION IS STILL GOOD
-
-```{r}
-ggplot(higher_order_interaction_model_wls_3, aes(x=.fitted, y=.resid)) +
-geom_point(colour = "purple") +
-geom_hline(yintercept = 0) +
-geom_smooth(colour = "green4")+
-ggtitle("Residual plot: Residual vs Fitted values")
-```
-
-```{r}
-ggplot(higher_order_interaction_model_wls_3, aes(x=.fitted, y=.resid)) +
-geom_point() +geom_smooth()+
-geom_hline(yintercept = 0)
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+An attempt to address the heteroscedasticity, in addition to any other assumption failure will be done after testing all other assumptions.
 
 
 
 ## NORMALITY
+
+The multiple linear regression analysis requires that the errors between observed and predicted values (i.e., the residuals of the regression) should be normally distributed.
+
+A histogram and q-q plot were developed to check if the residuals were normally distributed or not.
+
 
 ```{r}
 ggplot(data=boston_data, aes(residuals(higher_order_interaction_model_2))) +
@@ -620,36 +451,49 @@ ggplot(boston_data, aes(sample=higher_order_interaction_model_2$residuals)) +
 stat_qq() + stat_qq_line()
 ```
 
+Based on the plots above, it appears the residuals are not normal. 
 
-```{r}
-hist(residuals(higher_order_interaction_model_2))
-plot(higher_order_interaction_model_2, which=2)
-```
+A Shapiro-Wilk normality statistical test was also conducted to confirm that the residuals are not normally distributed
+
+Hypotheses
+$$
+\begin{aligned}
+H_0:&\mbox{ the sample data are significantly normally distributed}\\
+H_a:&\mbox{ the sample data are not significantly normally distributed } \\
+\end{aligned}
+$$
 
 ```{r}
 #Testing for Normality
 shapiro.test(residuals(higher_order_interaction_model_2))
 ```
 
-## OUTLIERS
+The p-value of the Shapiro-Wilk normality test is less than 0.05 (4.088e-13), so we fail to reject the null hypothesis, indicating we do not have normality. 
 
+An attempt to address the normality will be done after testing all other assumptions.
+
+
+## OUTLIERS
+The below approaches were explored to find and evaluate outliers or influential points.
+
+1. Residuals vs Leverage Plot
 
 ```{r}
 plot(higher_order_interaction_model_2, 5)
 ```
 
-Based on this plot everything looks okay
-Now I will look at the cooks distance and leverages plots
+The plot above shows that all cases are well inside of the Cook’s distance lines, indicating no outliers or no influential points.
 
-```{r}
-boston_data[cooks.distance(higher_order_interaction_model_2)>0.5,]
-```
-
+2. Cook’s Distance
 
 ```{r}
 plot(higher_order_interaction_model_2,pch=18,col="red",which=c(4))
 ```
 
+Based on the consensus that a value of more than 1 indicates an influential value, the cook's distance plot above indicates there are no influential values.
+
+
+3. Leverage points
 
 ```{r}
 lev=hatvalues(higher_order_interaction_model_2)
@@ -661,8 +505,6 @@ print("h_I>2p/n, outliers are")
 
 print(outlier2p)
 ```
-
-
 
 ```{r}
 print("h_I>3p/n, outliers are")
@@ -676,20 +518,205 @@ abline(h = 2 *p/n, lty = 1)
 abline(h = 3 *p/n, lty = 1)
 ```
 
-
-
-It appears we have high leverage points but none of them appear to be particularly influential (no points with a concerning cooks distance). It appears we do not have any outliers that could pose problems.
-
+Based on the above plot, it appears we have high leverage points but none of them appear to be particularly influential (no points with a concerning cooks distance). Hence, it appears we do not have any outliers that could pose problems.
 
 
 
 
+## Dealing with Heteroscedasticity and Normality
+Now that all multiple regression assumptions have been tested to check if the model is trustworthy, we then made attempts to address the heteroscedasticity and lack of normality. 
+
+We started by making a log transformation of the predictor so the difference between big and small numbers relatively becomes small.
+
+```{r}
+higher_order_interaction_model_log = lm(formula = log(medv) ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_interaction_model_log)
+```
+Some insignificant variables were observed after the log transformation, which were subsequently dropped from the model
+
+```{r}
+higher_order_interaction_model_log_2 = lm(formula = log(medv) ~ crim + I(crim^2) + chas + nox+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio + dis:lstat, data = boston_data)
+summary(higher_order_interaction_model_log_2)
+```
+
+The log-transformed model was tested for homoscedasticity and normality. 
+
+```{r}
+#Testing for Homoscedasticity
+bptest(higher_order_interaction_model_log_2)
+```
+
+The p-value of the Breusch-Pagan test is less than 0.05 (4.085e-07), indicating we still have heteroscedasticity. 
+
+```{r}
+#Testing for Normality
+shapiro.test(residuals(higher_order_interaction_model_log_2))
+```
+
+The p-value of the Shapiro-Wilk normality test is less than 0.05 (9.614e-12), so we fail to reject the null hypothesis, indicating we do not have normality. 
+
+Since the log-transformation approach did not resolve the heteroscedasticity or lack of normality, we then explored the Box-Cox transformations approach by identifying $\hat{\lambda}$, the maximum likelihood estimate of $\lambda$ to use in the power transformation
+
+```{r}
+bc=boxcox(higher_order_interaction_model_2,lambda=seq(-1,1))
+```
+
+
+```{r}
+#extract best lambda
+bestlambda=bc$x[which(bc$y==max(bc$y))]
+bestlambda
+```
+
+The best lambda estimate was then used to transform the model as follows:
+
+```{r}
+higher_order_interaction_model_2_box = lm(formula = (((medv^0.4949495)-1)/0.4949495) ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
+summary(higher_order_interaction_model_2_box)
+```
+
+The best lambda transformed model was then tested for homoscedasticity and normality. 
+
+```{r}
+bptest(higher_order_interaction_model_2_box)
+```
+The p-value of the Breusch-Pagan test is less than 0.05 (5.277e-05), indicating we still have heteroscedasticity. 
+
+```{r}
+#Testing for Normality
+shapiro.test(residuals(higher_order_interaction_model_2_box))
+```
+
+The p-value of the Shapiro-Wilk normality test is less than 0.05 (5.297e-10), so we fail to reject the null hypothesis, indicating we do not have normality.
+
+
+Since the box-cox transformation approach did not resolve the heteroscedasticity or lack of normality also, we then explored the weighted least squares regression method, which is an application of the more general concept of generalized least squares. This method gives less weight to observations with high variance as follows:
+
+
+```{r}
+#Determine absolute residuals
+resid = resid(higher_order_interaction_model_2)
+```
+
+```{r}
+#Fit a model to the residuals to model the variance pattern
+resid_model = lm(formula = log(resid^2) ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5), data = boston_data)
+```
+
+```{r}
+#Create weights using fitted variances
+fitted_var = exp(fitted(resid_model))
+weights = 1 / fitted_var
+```
+
+
+```{r}
+#Re-fit the model with weights
+higher_order_interaction_model_wls = lm(formula = medv ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ dis:rad + dis:lstat+ b:lstat, data = boston_data, weights = weights)
+summary(higher_order_interaction_model_wls)
+```
+
+Some insignificant variables were observed, which were subsequently dropped from the model
+
+```{r}
+higher_order_interaction_model_wls_2 = lm(formula = medv ~ crim + I(crim^2) + chas + nox + rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio + dis:lstat+ b:lstat, data = boston_data, weights = weights)
+summary(higher_order_interaction_model_wls_2)
+```
+A further insignificant variables was observed, which was also dropped from the model
+
+```{r}
+higher_order_interaction_model_wls_3 = lm(formula = medv ~ crim + I(crim^2) + chas + nox + rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + rm:dis + rm:ptratio + dis:lstat+ b:lstat, data = boston_data, weights = weights)
+summary(higher_order_interaction_model_wls_3)
+```
+The model derived from the weighted least squares regression method was tested for homoscedasticity and normality.
+
+```{r}
+bptest(higher_order_interaction_model_wls_3)
+```
+
+The p-value of the Breusch-Pagan test is greater than 0.05 (0.9934), indicating we now finally have homoscedasticity. 
+
+```{r}
+#Testing for Normality
+shapiro.test(residuals(higher_order_interaction_model_wls_3))
+```
+
+The p-value of the Shapiro-Wilk normality test is less than 0.05 (9.614e-12), indicating we still do not have normality.
 
 
 
 
+The linearity and outliers assumptions would be tested again to confirm they are still met
+
+# Linearity Assumption
+
+```{r}
+ggplot(higher_order_interaction_model_wls_3, aes(x=.fitted, y=.resid)) +
+geom_point(colour = "purple") +
+geom_hline(yintercept = 0) +
+geom_smooth(colour = "green4")+
+ggtitle("Residual plot: Residual vs Fitted values")
+```
+
+Based on the updated model, there appears to be no pattern of the residuals at all, indicating that the model still passes the linearity assumption that there is a straight-line (linear) relationship between the predictors and the response.
+
+```{r}
+ggplot(higher_order_interaction_model_wls_3, aes(x=.fitted, y=.resid)) +
+geom_point() +geom_smooth()+
+geom_hline(yintercept = 0)
+```
 
 
+## Outliers
+
+1. Residuals vs Leverage Plot
+
+```{r}
+plot(higher_order_interaction_model_wls_3, 5)
+```
+
+The plot above shows that all cases are well inside of the Cook’s distance lines, indicating no outliers or no influential points.
+
+2. Cook’s Distance
+
+```{r}
+plot(higher_order_interaction_model_wls_3,pch=18,col="red",which=c(4))
+```
+
+Based on the consensus that a value of more than 1 indicates an influential value, the cook's distance plot above indicates there are still no influential values.
+
+
+3. Leverage points
+
+```{r}
+lev=hatvalues(higher_order_interaction_model_2)
+p = length(coef(higher_order_interaction_model_2))
+n = nrow(boston_data)
+outlier2p = lev[lev>(2*p/n)]
+outlier3p = lev[lev>(3*p/n)]
+print("h_I>2p/n, outliers are")
+
+print(outlier2p)
+```
+
+```{r}
+print("h_I>3p/n, outliers are")
+
+print(outlier3p)
+```
+
+```{r}
+plot(rownames(boston_data),lev, main = "Leverage in Boston Housing Dataset", xlab="observation", ylab = "Leverage Value")
+abline(h = 2 *p/n, lty = 1)
+abline(h = 3 *p/n, lty = 1)
+```
+
+Based on the above plot, it appears we still have high leverage points but none of them appear to be particularly influential (no points with a concerning cooks distance). Hence, it appears we do not have any outliers that could pose problems.
+
+
+Our final model is therefore:
+
+$higher_order_interaction_model_wls_3$
 
 
 
