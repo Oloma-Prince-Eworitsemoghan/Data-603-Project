@@ -119,31 +119,72 @@ We believe multiple linear regression is an effective choice for this project fo
 
 ### 2.3 Workflows
 
-The workflow for this project follows a typical supervised learning pipeline. Below are the key steps:
+Below are the key steps:
 
-1. Read the dataset and view the head
+ A. Test for Multicollinearity
+ B. Create the Best Additive Model
+ C. Create the Best Interaction Model
+ D. Explore Higher Order Terms
+ E. Test Multiple Regression Assumptions (linearity, independence, equal variance, normality, outliers)
+
+### 2.4 Contributions
+ 
+1. Akinyemi Apampa
+ -Introduction writing: Context, Problem, Challenges
+ -Initial data preprocessing and cleaning
+ -Creating the additive regression model and interpreting results
+ -Assisting with final report compilation and proofreading
+ 
+ 2. Ravin Jayasuriya
+ -Multicollinearity testing and VIF analysis
+ -Stepwise regression and reduced additive model selection
+ -Writing and interpreting results of the additive model (t-tests, F-tests)
+ -Assisting with final report compilation and proofreading
+ 
+ 3. Joshua Ogunbo
+ -Developing and refining the full and reduced interaction models
+ -Conducting and interpreting ANOVA tests for interaction models
+ -Writing the section on interaction terms and model selection justification
+ -Assisting with final report compilation and proofreading
+ 
+ 4. Prince Oloma Eworitsemoghan
+ -Higher-order term exploration and model building (crim, zn, nox, rm, dis, rad, tax, lstat)
+ -Identifying and incorporating significant polynomial terms
+ -Writing the section on higher-order terms and their interpretation
+ -Assisting with final report compilation and proofreading
+ 
+ 5. David Fakojulo
+ -Addressing model assumption violations: log, Box-Cox, and WLS transformations
+ -Finalizing the best regression model using weighted least squares
+ -Performing and interpreting Shapiro-Wilk and Breusch-Pagan tests
+ -Assisting with final report compilation and proofreading
+ 
+ 
+# 3. MAIN RESULT OF THE ANALYSIS
+
+**Data Import and Initial Inspection**
 
 ```{r echo = FALSE}
 boston_data= read.csv("./BostonHousing.csv")
-head(boston_data)
+kable(head(boston_data, 3), caption = "First Three Rows of the Boston Housing Dataset")
 ```
 
-2. Modify the categorical variable to ensure the stepwise approach can run
-```{r}
+**Recoding Categorical Variables for Model Compatibility**
+```{r echo = FALSE}
 boston_data$chas[which(boston_data$chas==0)] = "No"
 boston_data$chas[which(boston_data$chas==1)] = "Yes"
+kable(head(boston_data, 3), caption = "First Three Rows of the Boston Housing Dataset")
 ```
 
 
-1. **Testing for Multicollinearity**  
-   From the below, multicollinearity was not detected for any of the variables. 
-
-
+A. **Test for Multicollinearit**  
+From the below, multicollinearity was not detected for any of the variables. 
+```{r}
+boston_additive <- lm(medv ~ crim + zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + b + lstat, data = boston_data)
+```
 
 ```{r echo = FALSE}
-boston_additive = lm(medv~crim+zn+indus+chas+nox+rm+age+dis+rad+tax+ptratio+b+lstat, data= boston_data)
-
-imcdiag(boston_additive, method = "VIF")
+invisible(capture.output(imcdiag(boston_additive, method = "VIF")))
 ```
 
 ```{r echo = FALSE}
@@ -152,99 +193,251 @@ vif_table <- data.frame(
   "VIF" = c(1.7922,2.2928,3.9916,1.0740,4.3937,1.9337,3.1008,3.9559,7.4845,9.0086,1.7991,1.3485,2.9415),
   "Detection" = c(0,0,0,0,0,0,0,0,0,0,0,0,0)
 )
-kable(vif_table, caption = "Table 1.0 - TEST FOR MULTICOLINEARITY")
+kable(vif_table, caption = "TEST FOR MULTICOLINEARITY")
 ```
 
-b. Additive model
-```{r}
-summary(boston_additive)
+The **Variance Inflation Factor (VIF)** values for all predictors in the model are below the commonly used threshold of **10**, indicating that **multicollinearity is not a concern**.
+
+
+B. **Create the Best Additive Model**  
+
+We perform individual *t*-tests to assess the significance of each predictor in the model. The hypotheses are as follows:
+
+- **Null Hypothesis**:  
+  $$ H_0: \beta_1 = \beta_2 = \cdots = \beta_p = 0 $$
+
+- **Alternative Hypothesis**:  
+  $$ H_a: \text{At least one } \beta_i \ne 0, \quad \text{where } i = 1, 2, \ldots, p $$
+
+These tests help determine whether each predictor contributes significantly to explaining the variability in the response variable.
+
+```{r echo = FALSE}
+boston_additive_summary <- summary(boston_additive)
+boston_additive_coef_table <- as.data.frame(boston_additive_summary$coefficients)
+
+
+knitr::kable(boston_additive_coef_table, digits = 4, caption = "Coefficient Estimates from the Additive Model")
+invisible(capture.output(summary(boston_additive)))
 ```
 
-Using and individual t-test with the hypothesis: 
+From the regression output, we observe:
 
+- **Significant predictors** (p-value < 0.05): `crim`, `zn`, `chas`, `nox`, `rm`, `dis`, `rad`, `tax`, `ptratio`, `b`, `lstat`
+- **Insignificant predictors**: `indus` (p = 0.7383) and `age` (p = 0.9582)
+
+Because the p-values of `indus` and `age` are greater than 0.05, we fail to reject the null hypotheses that their coefficients are zero. Thus, these variables do not significantly contribute to the prediction of `medv` in the presence of other variables.
+
+The fitted multiple linear regression model is:
 $$
 \begin{aligned}
-H_0&:\beta_1=\beta_2=\beta_p=0\\
-H_a&:\mbox{at least one }\beta_i\mbox{ is not zero } (i=1,2,...,p) 
+\hat{medv} =\ & 3.646 - 0.108 \cdot crim + 0.04642 \cdot zn \\
+& + 0.02056 \cdot indus + 2.687 \cdot chas - 17.7666 \cdot nox \\
+& + 3.8099 \cdot rm + 0.0007 \cdot age - 1.4756 \cdot dis \\
+& + 0.3060 \cdot rad - 0.0123 \cdot tax - 0.9527 \cdot ptratio \\
+& + 0.0093 \cdot b- 0.5248 \cdot lstat
 \end{aligned}
 $$
-The p-value for indus and age are  0.738288 and 0.958229, respectively. Because these p-values are greater than our $\alpha$ of 0.05, we fail to reject the null hypotheses and beta values for these variables are determined to be insignificant.
+\
 
-The model was fit without the insignificant variables
+### Building the Reduced Additive model
 
+We remove the variables `indus` and `age`, which were found to be statistically insignificant in the full model, and test the following hypotheses:
+
+- **Null Hypothesis**:  
+  $$ H_0: \beta_{\text{indus}} = \beta_{\text{age}} = 0 $$
+
+- **Alternative Hypothesis**:  
+  $$ H_a: \text{At least one of } \beta_{\text{indus}}, \beta_{\text{age}} \ne 0 $$
+A high p-value would indicate that removing `indus` and `age` does not significantly worsen the model, and thus the reduced model is preferred for its simplicity.
+  
 ```{r}
-reduced_additive_model = lm(formula = medv ~ crim + zn + factor(chas) + nox + rm+ dis + rad + tax + ptratio + b + lstat, data = boston_data)
-summary(reduced_additive_model)
+reduced_additive_model <- lm(
+  formula = medv ~ crim + zn + factor(chas) + nox + rm +
+    dis + rad + tax + ptratio + b + lstat,
+  data = boston_data
+)
 ```
 
-The reduced model shows that all variables have p-values that are less than 0.05, making them significant. 
-
-We will run a global f-test/anova to check if we should keep the reduced model. 
-
-Hypotheses
-$$
-\begin{aligned}
-H_0&:\beta_i=0\\
-H_a&:\beta_i\neq0 (i=1,2,...,p)
-\end{aligned}
-$$
+```{r echo = FALSE}
+reduced_model_summary <- summary(reduced_additive_model)
+reduced_coef_table <- as.data.frame(reduced_model_summary$coefficients)
 
 
-```{r}
-table1 = data.frame((anova(reduced_additive_model,boston_additive)))
-print(table1)
+knitr::kable(reduced_coef_table, digits = 4, 
+  caption = "Coefficient Estimates from the Reduced Additive Model")
+invisible(capture.output(summary(reduced_additive_model)))
 ```
 
-Since the p_value is 0.9443 which is greater than 0.05, this indicates that we do not have enough evidence against the null hypothesis. Therefore, we can conclude that the reduced model is preferred.
+The reduced model shows that **all included variables have p-values less than 0.05**, indicating that they are statistically significant.
 
-Stepwise selection method was also used to check for the best additive model
+We will now run a **global F-test (ANOVA)** to assess whether removing the variables `indus` and `age` significantly worsens the model fit.
 
-```{r}
+
+```{r echo = FALSE}
+anova_results <- anova(reduced_additive_model, boston_additive)
+
+knitr::kable(anova_results, digits = 4, 
+  caption = "ANOVA Comparison of Reduced and Full Additive Model")
+```
+
+Since the p-value is **0.9443**, which is much greater than the threshold of **0.05**, we **fail to reject the null hypothesis**. This indicates that `indus` and `age` do not significantly improve the model. Hence, the reduced model is more appropriate as it maintains model quality while eliminating unnecessary predictors.
+
+
+### Stepwise Model Selection**
+
+To further validate the choice of predictors and identify the most parsimonious model, we used the `ols_step_both_p()` function from the **olsrr** package to perform stepwise selection based on p-values.
+
+```{r echo = FALSE}
 stepmod=ols_step_both_p(boston_additive,p_enter = 0.05, p_remove = 0.1, details=FALSE)
-summary(stepmod$model)
+
+stepwise_model_summary <- summary(stepmod$model)
+stepwise_coef_table <- as.data.frame(stepwise_model_summary$coefficients)
+
+
+knitr::kable(
+  stepwise_coef_table,
+  digits = 4,
+  caption = "Coefficient Estimates from the Stepwise-Selected Model"
+)
+
+invisible(capture.output(summary(stepmod$model)))
 ```
 
-The best model from the stepwise selection method above is the same as the reduced model gotten earlier. Hence, the final additive model is: 
+The selected model is the same as the reduced model obtained earlier. 
+Hence, the **final additive model is**:
 
-$\hat{medv} = 36.341145 - 0.108413crim_{i} +0.045845zn_{i} +2.718716chas_{i} -17.376023nox_{i} + 3.801579rm_{i} -1.492711dis_{i} + 0.299608rad_{i} -0.011778tax_{i} -0.946525ptratio_{i} +0.009291b_{i} - 0.522553lstat_{i}$
+$$
+\begin{aligned}
+\hat{medv}_i =\ & 36.3411 - 0.5226 \cdot lstat_i + 3.8016 \cdot rm_i \\
+& - 0.9465 \cdot ptratio_i - 1.4927 \cdot dis_i - 17.3760 \cdot nox_i + 2.7187 \cdot chas_i \\
+& + 0.0093 \cdot b_i + 0.0458 \cdot zn_i - 0.1084 \cdot crim_i + 0.2996 \cdot rad_i - 0.0118 \cdot tax_i
+\end{aligned}
+$$
 
-where $chas_{i}$ is 1 if the tract bounds Charles River and 0 if otherwise
+Where:
 
-d. Interaction model
+$$
+\begin{aligned}
+&\quad chas_i = 1 \quad \text{if the tract bounds the Charles River, and 0 otherwise}
+\end{aligned}
+$$
+C. **Create the Best Interaction Model**
 
-A full two-way interaction model was created with all interaction terms based on the best additive model
+A full two-way interaction model was constructed by including all possible interaction terms among the predictors in the final additive model obtained from stepwise selection.
 
-```{r}
-interaction_model = lm(formula = medv ~ (crim + zn + chas + nox + rm+ dis + rad + tax + ptratio + b + lstat)^2, data = boston_data)
-summary(interaction_model)
+```{r echo = FALSE}
+interaction_model <- lm(
+  formula = medv ~ (crim + zn + chas + nox + rm + dis + rad + tax + ptratio + b + lstat)^2,
+  data = boston_data
+)
+
+interaction_model_summary <- summary(interaction_model)
+interaction_coef_table <- as.data.frame(interaction_model_summary$coefficients)
+
+knitr::kable(
+  interaction_coef_table,
+  digits = 4,
+  caption = "Coefficient Estimates from the Full Two-Way Interaction Model"
+)
+
+invisible(capture.output(summary(interaction_model)))
 ```
 
-The full interactive model has some interactions with p-values greater than 0.05. These insignificant interactions were dropped to create a reduced interactive model.
+A full two-way interaction model was constructed by including all possible interaction terms among the predictors in the final additive model obtained from stepwise selection.
 
-```{r}
-reduced_interaction_model = lm(formula = medv ~ crim + zn + chas + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas + crim:nox + crim:rm+ crim:dis +crim:rad+ crim:tax+ crim:b +crim:lstat + zn:dis + zn:tax + chas:nox +chas:rm +chas:lstat + nox:rad + nox:tax+ rm:dis + rm:ptratio+ rm:b+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
-summary(reduced_interaction_model)
+The full interaction model includes several interaction terms with **p-values greater than 0.05**, indicating that they are not statistically significant. These insignificant interactions were dropped to create a **reduced interaction model**.
+
+
+```{r echo = FALSE}
+reduced_interaction_model <- lm(
+  formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + ptratio + b + lstat +
+    crim:zn + crim:chas + crim:nox + crim:rm + crim:dis + crim:rad + crim:tax + crim:b + crim:lstat +
+    zn:dis + zn:tax +
+    chas:nox + chas:rm + chas:lstat +
+    nox:rad + nox:tax +
+    rm:dis + rm:ptratio + rm:b + rm:lstat +
+    dis:rad + dis:lstat +
+    b:lstat,
+  data = boston_data
+)
+
+
+reduced_interaction_summary <- summary(reduced_interaction_model)
+reduced_interaction_coef_table <- as.data.frame(reduced_interaction_summary$coefficients)
+
+knitr::kable(
+  reduced_interaction_coef_table,
+  digits = 4,
+  caption = "Coefficient Estimates from the Reduced Interaction Model"
+)
+
+invisible(capture.output(summary(reduced_interaction_model)))
 ```
 
 The output of the reduced interactive model showed more insignificant interactions, which were further dropped.
 
-```{r}
-reduced_interaction_model2 = lm(formula = medv ~ crim + zn + chas + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + nox:tax+ rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
-summary(reduced_interaction_model2)
+```{r echo = FALSE}
+reduced_interaction_model2 <- lm(
+  formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + ptratio + b + lstat +
+    crim:zn + crim:chas + crim:rad + crim:tax +
+    zn:dis +
+    chas:nox + chas:rm +
+    nox:rad + nox:tax +
+    rm:dis + rm:ptratio + rm:lstat +
+    dis:rad + dis:lstat +
+    b:lstat,
+  data = boston_data
+)
+
+reduced_interaction_model2_summary <- summary(reduced_interaction_model2)
+reduced_interaction_model2_coef_table <- as.data.frame(reduced_interaction_model2_summary$coefficients)
+
+knitr::kable(
+  reduced_interaction_model2_coef_table,
+  digits = 4,
+  caption = "Table: Coefficient Estimates from the Final Reduced Interaction Model"
+)
+
+invisible(capture.output(summary(reduced_interaction_model2)))
 ```
 
 The further reduced model then showed nox:tax as insignificant, which was also dropped.
 
-```{r}
-reduced_interaction_model3 = lm(formula = medv ~ crim + zn + chas + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
-summary(reduced_interaction_model3)
+```{r echo = FALSE}
+reduced_interaction_model3 <- lm(
+  formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + ptratio + b + lstat +
+    crim:zn + crim:chas + crim:rad + crim:tax +
+    zn:dis +
+    chas:nox + chas:rm +
+    nox:rad +
+    rm:dis + rm:ptratio + rm:lstat +
+    dis:rad + dis:lstat +
+    b:lstat,
+  data = boston_data
+)
+
+reduced_interaction_model3_summary <- summary(reduced_interaction_model3)
+reduced_interaction_model3_coef_table <- as.data.frame(reduced_interaction_model3_summary$coefficients)
+
+knitr::kable(
+  reduced_interaction_model3_coef_table,
+  digits = 4,
+  caption = "Table: Coefficient Estimates from the Third Reduced Interaction Model"
+)
+
+invisible(capture.output(summary(reduced_interaction_model3)))
 ```
 
 Now that all interactions were significant, an f-test was run to compare reduced interactive model and full interaction model
 
-```{r}
-table2= data.frame((anova(reduced_interaction_model3,interaction_model)))
-print(table2)
+```{r echo = FALSE}
+all_reduced_interaction_full_anova <- data.frame(anova(reduced_interaction_model3, interaction_model))
+
+knitr::kable(
+  all_reduced_interaction_full_anova,
+  digits = 9,
+  caption = "ANOVA Comparison of Third Reduced Interaction Model and Full Interaction Model"
+)
 ```
 
 Based on the summary above, the p-value is $8.242e-12<0.05$, suggesting the null hypothesis should be rejected. Also, the adjusted $R^2_{adj}$ and RSE of the full interaction model are 0.888 and 3.078 respectively, while the adjusted $R^2_{adj}$ and RSE of the reduced interaction model are 0.8627 and 3.408 respectively. 
@@ -255,7 +448,7 @@ We would choose the reduced model because it retains all significant interaction
 
 
 
-# HIGHER ORDER EXPLORATION
+D. **Explore Higher Order Terms**      
 
 To check for possible higher order relationships, we explored all pairwise combinations of continuous variables in scatterplots to see how the response variable looked with respect to each of the continuous additive predictors
 
@@ -377,7 +570,7 @@ $\hat{medv} = 36.341145 - 0.108413crim_{i} +0.045845zn_{i} +2.718716chas_{i} -17
 
 where $chas_{i}$ is 1 if the tract bounds Charles River and 0 if otherwise
 
-# Multiple Regression Assumptions
+E. **Testing Multiple Regression Assumptions**  
 The following multiple regression assumptions were tested to check if the model is trustworthy
 
 # Linearity Assumption
@@ -714,96 +907,33 @@ abline(h = 3 *p/n, lty = 1)
 Based on the above plot, it appears we still have high leverage points but none of them appear to be particularly influential (no points with a concerning cooks distance). Hence, it appears we do not have any outliers that could pose problems.
 
 
-Our final model is therefore:
-
-$higher_order_interaction_model_wls_3$
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-stepwise
-ols_backwards
-ols_forward
-Best Subset
-HigherOrder
-d. R squared & RSE
-e. 
-
-g.  
-
-2.4 Contributions
-
-3. MAIN RESULTS OF THE ANALYSIS
-3.1 Results
-Individual T-test: 
-
-Hypothesis: 
-
-
-Based off the values indus and age do not seem relevent. 
-
-We will verify utilizing a global anova f-test: 
-```{r}
-
-
-```
-Fail to reject null, they are not relevent. 
-
-
-Comparison Of R^2 and RSE 
-
-Chas is a factor. 
-
-
-Final Additive Model: 
-
-```{r}
-#confint(boston_additive_dropped)
-```
-
-
-
-4. Conclusion and Discussion
-4.1 Approach
-4.2 Future Work.
-
-
-
-### 2.4 Contributions
-
-In this project, we use a **predictive modeling approach** based on **multiple linear regression** to estimate the median value of homes in Boston. This method is well-suited for our goal of understanding how different housing features influence prices while also producing accurate predictions.
-
-\
-\
-\
-
-# 3. MAIN RESULT OF THE ANALYSIS
-
-
-\
-\
-\
-
 # 4. CONCLUSION AND DISCUSSION
 
-\
-\
-\
+We developed a predictive model using multiple linear regression to estimate the median value of owner-occupied homes in Boston based on 13 housing and neighborhood features. After loading the data, we tested for multicollinearity; where none was detected. Next, we built a baseline additive model and refined it by removing insignificant predictors. Afterwards, Interaction effects were explored, and a reduced interaction model was selected based on significance and model performance. Then we explored higher order terms to capture non-linear relationships, and we iteratively refined the model to retain only the significant predictors. Finally we tested the multiple regression assumptions: which included linearity, independence, equal variance, normality, and outliers. While the final model met most assumptions, the residuals remained non-normal despite attempts with log, Box-Cox, and weighted least squares transformations. Ultimately, the weighted least squares regression model was selected as the final model, as it effectively treated heteroscedasticity, improved model interpretability, and maintained linearity and robustness against outliers. This comprehensive modeling process provided insights into key factors influencing housing prices, our final predictive model is: 
+
+$\hat{medv} = 72.03-6.281crim+0.003005I(crim^2)+24.61chas-15.37nox-12.46rm+1.827I(rm^2)-7.739dis+0.1715I(dis^2)+0.3466rad-0.01298tax+2.704ptratio+0.01990b-4.951lstat+0.5050I(lstat^2)-0.02711I(lstat^3)+0.0006835I(lstat^4)-0.000006415I(lstat^5)+1.485crim:chas-0.3624crim:rad+0.02194crim:tax-22.75chas:nox-1.872chas:rm+0.6587rm:dis-0.5220rm:ptratio+0.09832dis:lstat-0.0006878b:lstat$
+
+
+Based off of this, the key factors that predict the median value (in thousands of dollars) are: 
+
+crim, I(crim^2), chas, nox, rm, I(rm^2), dis, I(dis^2), rad, tax, ptratio, b, lstat, I(lstat^2), I(lstat^3), I(lstat^4), I(lstat^5), crim:chas, crim:rad, crim:tax, chas:nox, chas:rm, rm:dis, rm:ptratio, dis:lstat, b:lstat
+
+
+
+4.1 Approach
+The approach we took does seem logically sound. Starting with a basic multiple linear regression model allowed us to build a strong baseline and interpret the effects of various predictors on housing prices. Looking at interaction terms and higher-order relationships enabled us to improve model complexity effectively. Additionally, testing each of the regression assumptions step-by-step ensured that our final model would be valid statistically. Some issues we had were that there was consistent violation of the normality assumption, even with various transformations. Possibilities for improvement are possibly running non-linear or machine learning models. They may be able to handle normality and allow us to create a better predictive model. 
+
+
+4.2 Future Work
+
+
+
+
+
+
+
+
+
 
 # 5. REFERENCES
 [1] - Dataset description
