@@ -1083,6 +1083,37 @@ abline(h = 3 *p/n, lty = 1)
 
 Based on the above plot, it appears we still have high leverage points but none of them appear to be particularly influential (no points with a concerning cooks distance). Hence, it appears we do not have any outliers that could pose problems.
 
+## Predicting the Median Value
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+newdata <- data.frame(
+  crim = 2.5,
+  chas = 'Yes',
+  nox = 0.643,
+  rm = 5.783,
+  dis = 4.632,
+  rad = 4,
+  tax = 324,
+  ptratio = 18.1,
+  b = 301.1,
+  lstat = 12.35
+)
+
+prediction <- suppressWarnings(
+  predict(higher_order_interaction_model_wls_3, newdata, interval = "predict", level = 0.95)
+)
+
+prediction_table <- as.data.frame(prediction)
+
+knitr::kable(
+  prediction_table,
+  digits = 4,
+  caption = "Predicted Median Home Value with 95% Prediction Interval"
+)
+```
+ 
+Based on the prediction using the `predict()` function, we are **95% confident** that the median value (`medv`) of owner-occupied homes, given the specified predictor values, lies between **\$12,558** and **\$22,307**.
+ 
 
 # 4. CONCLUSION AND DISCUSSION
 
