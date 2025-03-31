@@ -15,11 +15,11 @@ date: ""
 
 \begin{center}
     {\LARGE \textbf{Predicting Boston Housing Prices}}\\[1em]
-    {\large Akinyemi Apampao, xxxx}\\[1em]
-    {\large David Fakolujo, xxxx}\\[1em]
-    {\large Joshua Ogunbo, xxxx}\\[1em]
-    {\large Prince Oloma, xxxx}\\[1em]
-    {\large Ravin Jayasuriya, xxxx}\\
+    {\large Akinyemi Apampao, 30234456}\\[1em]
+    {\large David Fakolujo, 30273636}\\[1em]
+    {\large Joshua Ogunbo, 30272413}\\[1em]
+    {\large Prince Oloma, 30263726}\\[1em]
+    {\large Ravin Jayasuriya, 30022788}\\
 \end{center}
 
 \newpage
@@ -50,7 +50,7 @@ The problem we aim to address is the difficulty in understanding which features 
 
 ### 1.1.3 Challenges
 
-// ADD Data normality issue
+The assumptions that we ran showed that the data was not normal and had heteroscedasticity. Another challenge that we faced was choosing between our full interaction model and our reduced interaction model. The ANOVA tests said that we should use the full interactive model even though the reduced had all significant terms and interactions while the full interactive model had some insignificant terms and interactions. This is supported by the respective Adjusted R squared and RSE values for both models.
 
 \
 \
@@ -122,42 +122,46 @@ We believe multiple linear regression is an effective choice for this project fo
 Below are the key steps:
 
  A. Test for Multicollinearity
+ 
  B. Create the Best Additive Model
+ 
  C. Create the Best Interaction Model
+ 
  D. Explore Higher Order Terms
+ 
  E. Test Multiple Regression Assumptions (linearity, independence, equal variance, normality, outliers)
 
 ### 2.4 Contributions
  
 1. Akinyemi Apampa
- -Introduction writing: Context, Problem, Challenges
- -Initial data preprocessing and cleaning
- -Creating the additive regression model and interpreting results
- -Assisting with final report compilation and proofreading
+  - Introduction writing: Context, Problem, Challenges
+  - Initial data preprocessing and cleaning
+  - Creating the additive regression model and interpreting results
+  - Assisting with final report compilation and proofreading
  
- 2. Ravin Jayasuriya
- -Multicollinearity testing and VIF analysis
- -Stepwise regression and reduced additive model selection
- -Writing and interpreting results of the additive model (t-tests, F-tests)
- -Assisting with final report compilation and proofreading
+2. Ravin Jayasuriya
+  - Multicollinearity testing and VIF analysis
+  - Stepwise regression and reduced additive model selection
+  - Writing and interpreting results of the additive model (t-tests, F-tests)
+  - Assisting with final report compilation and proofreading
  
- 3. Joshua Ogunbo
- -Developing and refining the full and reduced interaction models
- -Conducting and interpreting ANOVA tests for interaction models
- -Writing the section on interaction terms and model selection justification
- -Assisting with final report compilation and proofreading
+3. Joshua Ogunbo
+  - Developing and refining the full and reduced interaction models
+  - Conducting and interpreting ANOVA tests for interaction models
+  - Writing the section on interaction terms and model selection justification
+  - Assisting with final report compilation and proofreading
  
- 4. Prince Oloma Eworitsemoghan
- -Higher-order term exploration and model building (crim, zn, nox, rm, dis, rad, tax, lstat)
- -Identifying and incorporating significant polynomial terms
- -Writing the section on higher-order terms and their interpretation
- -Assisting with final report compilation and proofreading
+4. Prince Oloma Eworitsemoghan
+  - Higher-order term exploration and model building (crim, zn, nox, rm, dis, rad, tax, lstat)
+  - Identifying and incorporating significant polynomial terms
+  - Writing the section on higher-order terms and their interpretation
+  - Assisting with final report compilation and proofreading
  
- 5. David Fakojulo
- -Addressing model assumption violations: log, Box-Cox, and WLS transformations
- -Finalizing the best regression model using weighted least squares
- -Performing and interpreting Shapiro-Wilk and Breusch-Pagan tests
- -Assisting with final report compilation and proofreading
+5. David Fakojulo
+  - Addressing model assumption violations: log, Box-Cox, and WLS transformations
+  - Finalizing the best regression model using weighted least squares
+  - Performing and interpreting Shapiro-Wilk and Breusch-Pagan tests
+  - Assisting with final report compilation and proofreading
  
  
 # 3. MAIN RESULT OF THE ANALYSIS
@@ -177,10 +181,14 @@ kable(head(boston_data, 3), caption = "First Three Rows of the Boston Housing Da
 ```
 
 
-A. **Test for Multicollinearit**  
+A. **Test for Multicollinearity**  
 From the below, multicollinearity was not detected for any of the variables. 
 ```{r}
-boston_additive <- lm(medv ~ crim + zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + b + lstat, data = boston_data)
+boston_additive <- lm(
+  medv ~ crim + zn + indus + chas + nox + rm + age +
+    dis + rad + tax + ptratio + b + lstat,
+  data = boston_data
+)
 ```
 
 ```{r echo = FALSE}
@@ -446,138 +454,196 @@ These suggest the full interaction model should be preferred. However, the full 
 
 We would choose the reduced model because it retains all significant interactions while eliminating insignificant ones, ensuring better interpretability and avoiding unnecessary complexity without a substantial loss in explanatory power.
 
+\
+\
+\
+\
 
+\
+\
+\
+\
+
+\
+\
+\
+\
+
+\
+\
+\
+
+\
+\
+\
+
+\
+\
+\
 
 D. **Explore Higher Order Terms**      
 
 To check for possible higher order relationships, we explored all pairwise combinations of continuous variables in scatterplots to see how the response variable looked with respect to each of the continuous additive predictors
 
-```{r}
-higher_order_data = data.frame(boston_data$medv, boston_data$crim, boston_data$zn, boston_data$chas, boston_data$nox, boston_data$rm, boston_data$dis, boston_data$rad, boston_data$tax, boston_data$ptratio, boston_data$b, boston_data$lstat)
+```{r, warning=FALSE, message=FALSE, results='hide', echo = FALSE}
+suppressMessages(library(GGally))
 
-ggpairs(higher_order_data,lower = list(continuous = wrap("smooth_loess", color = "red"), combo = "facethist", discrete = "facetbar", na = "na"))
+higher_order_data <- data.frame(
+  medv = boston_data$medv,
+  crim = boston_data$crim,
+  zn = boston_data$zn,
+  chas = boston_data$chas,
+  nox = boston_data$nox,
+  rm = boston_data$rm,
+  dis = boston_data$dis,
+  rad = boston_data$rad,
+  tax = boston_data$tax,
+  ptratio = boston_data$ptratio,
+  b = boston_data$b,
+  lstat = boston_data$lstat
+)
+
+
+ggpairs(
+  higher_order_data,
+  lower = list(
+    continuous = wrap("smooth_loess", color = "red"),
+    combo = "facethist",
+    discrete = "facetbar",
+    na = "na"
+  )
+)
 ```
 
-It looks like the variables that might be worth exploring for possible higher order relationships with medv are crim, zn, nox, rm, dis, rad, tax, lstat. Each of these variables were tested as follows:
 
-# Possible higher order relationship exploration for crim
+It looks like the variables that might be worth exploring for possible higher-order relationships with `medv` are: `crim`, `zn`, `nox`, `rm`, `dis`, `rad`, `tax`, and `lstat`. Each of these variables was tested using second or higher-degree polynomial terms.
 
-```{r}
+
+```{r, warning=FALSE, message=FALSE, results='hide', echo = FALSE}
 higher_order_crim_2 = lm(formula = medv ~ crim + I(crim^2) + zn + chas + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_crim_2)
-```
 
-```{r}
 higher_order_crim_3 = lm(formula = medv ~ crim + I(crim^2) + I(crim^3) + zn + chas + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_crim_3)
-```
 
-# Possible higher order relationship exploration for zn
-```{r}
 higher_order_zn_2 = lm(formula = medv ~ crim + zn + I(zn^2) + chas + nox + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_zn_2)
-```
 
-# Possible higher order relationship exploration for nox
-```{r}
 higher_order_nox_2 = lm(formula = medv ~ crim + zn + chas + nox + I(nox^2) + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_nox_2)
-```
 
-```{r}
 higher_order_nox_3 = lm(formula = medv ~ crim + zn + chas + nox + I(nox^2) + I(nox^3) + rm+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_nox_3)
-```
 
-# Possible higher order relationship exploration for rm
-```{r}
 higher_order_rm_2 = lm(formula = medv ~ crim + zn + chas + nox + rm+ I(rm^2)+ dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_rm_2)
-```
 
-```{r}
 higher_order_rm_3 = lm(formula = medv ~ crim + zn + chas + nox + rm+ I(rm^2)+ I(rm^3) + dis + rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_rm_3)
-```
 
-# Possible higher order relationship exploration for dis
-```{r}
 higher_order_dis_2 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + I(dis^2)+ rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_dis_2)
-```
 
-
-```{r}
 higher_order_dis_3 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + I(dis^2)+ I(dis^3)+ rad + tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_dis_3)
-```
 
-
-# Possible higher order relationship exploration for rad
-```{r}
 higher_order_rad_2 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + I(rad^2)+ tax + ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_rad_2)
-```
 
-# Possible higher order relationship exploration for tax
-```{r}
 higher_order_tax_2 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + I(tax^2)+ ptratio + b + lstat + crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_tax_2)
-```
 
-# Possible higher order relationship exploration for lstat
-```{r}
 higher_order_lstat_2 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + ptratio + b + lstat + I(lstat^2)+ crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_lstat_2)
-```
 
-```{r}
 higher_order_lstat_3 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_lstat_3)
-```
 
-```{r}
 higher_order_lstat_4 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_lstat_4)
-```
 
-```{r}
 higher_order_lstat_5 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5)+ crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_lstat_5)
-```
 
-```{r}
 higher_order_lstat_6 = lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5)+ I(lstat^6)+ crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
 summary(higher_order_lstat_6)
 ```
 
-Based on the exploration above, the significant higher order relationships were then added to the reduced interactive model
+\
 
-```{r}
-higher_order_interaction_model = lm(formula = medv ~ crim + I(crim^2)+ zn + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5)+ crim:zn + crim:chas  +crim:rad+ crim:tax + zn:dis+ chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ rm:lstat+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
-summary(higher_order_interaction_model)
+Based on the exploration of potential higher-order relationships for variables such as `crim`, `zn`, `nox`, `rm`, `dis`, `rad`, `tax`, and `lstat`, only the **significant polynomial terms** were retained. These significant higher-order terms were then added to the **reduced interaction model** to form an extended model that captures potential **non-linear effects** while preserving **interpretability**.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+higher_order_interaction_model <- lm(
+  formula = medv ~ crim + I(crim^2) + zn + chas + nox + I(nox^2) + rm + I(rm^2) +
+    dis + I(dis^2) + rad + tax + ptratio + b + lstat + I(lstat^2) + I(lstat^3) +
+    I(lstat^4) + I(lstat^5) + crim:zn + crim:chas + crim:rad + crim:tax +
+    zn:dis + chas:nox + chas:rm + nox:rad + rm:dis + rm:ptratio + rm:lstat +
+    dis:rad + dis:lstat + b:lstat,
+  data = boston_data
+)
+
+higher_order_interaction_summary <- summary(higher_order_interaction_model)
+higher_order_interaction_coef_table <- as.data.frame(higher_order_interaction_summary$coefficients)
+
+knitr::kable(
+  higher_order_interaction_coef_table,
+  digits = 4,
+  caption = "Coefficient Estimates from the Higher-Order Interaction Model"
+)
+
+invisible(capture.output(summary(higher_order_interaction_model)))
 ```
 
 The new insignificant variables were then dropped to get a reduced higher order interaction model.
 
-```{r}
-higher_order_interaction_model_2 = lm(formula = medv ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
-summary(higher_order_interaction_model_2)
-```
-The higher order interaction model with significant variables is:
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+higher_order_interaction_model_2 <- lm(
+  formula = medv ~ crim + I(crim^2) + chas + nox + I(nox^2) + rm + I(rm^2) +
+    dis + I(dis^2) + rad + tax + ptratio + b + lstat + I(lstat^2) + I(lstat^3) +
+    I(lstat^4) + I(lstat^5) + crim:chas + crim:rad + crim:tax + chas:nox +
+    chas:rm + nox:rad + rm:dis + rm:ptratio + dis:rad + dis:lstat + b:lstat,
+  data = boston_data
+)
 
-$\hat{medv} = 36.341145 - 0.108413crim_{i} +0.045845zn_{i} +2.718716chas_{i} -17.376023nox_{i} + 3.801579rm_{i} -1.492711dis_{i} + 0.299608rad_{i} -0.011778tax_{i} -0.946525ptratio_{i} +0.009291b_{i} - 0.522553lstat_{i}$
+higher_order_interaction_model_2_summary <- summary(higher_order_interaction_model_2)
+higher_order_interaction_model_2_coef_table <- as.data.frame(higher_order_interaction_model_2_summary$coefficients)
+
+knitr::kable(
+  higher_order_interaction_model_2_coef_table,
+  digits = 4,
+  caption = "Coefficient Estimates from the Reduced Higher-Order Interaction Model"
+)
+
+invisible(capture.output(summary(higher_order_interaction_model_2)))
+```
+The higher-order interaction model with significant variables is:
+
+$$
+\begin{aligned}
+\hat{medv}_i =\ & 36.3411 - 0.1084 \cdot crim_i + 0.0458 \cdot zn_i + 2.7187 \cdot chas_i - 17.3760 \cdot nox_i \\
+& + 3.8016 \cdot rm_i - 1.4927 \cdot dis_i + 0.2996 \cdot rad_i - 0.0118 \cdot tax_i - 0.9465 \cdot ptratio_i \\
+& + 0.0093 \cdot b_i - 0.5226 \cdot lstat_i
+\end{aligned}
+$$
 
 where $chas_{i}$ is 1 if the tract bounds Charles River and 0 if otherwise
+
+\
+\
+\
+\
+\
+\
 
 E. **Testing Multiple Regression Assumptions**  
 The following multiple regression assumptions were tested to check if the model is trustworthy
 
-# Linearity Assumption
+## Linearity Assumption
 
 A scatter plot of the distribution of residuals (errors) vs fitted values (predicted values) was plotted below
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 ggplot(higher_order_interaction_model_2, aes(x=.fitted, y=.resid)) +
 geom_point() +geom_smooth()+
 geom_hline(yintercept = 0)+
@@ -595,7 +661,7 @@ In the Boston housing dataset, the subjects were not related to time, space, or 
 
 The residuals plot in the linearity assumption section indicates a smooth fit to the residuals, which is good. In addition to the residuals plot, a scale-location plot between fitted values and standardized residuals was also plotted to show if the residuals are spread equally along the ranges of predictors
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 ggplot(higher_order_interaction_model_2, aes(x=.fitted, y=sqrt(abs(.stdresid)))) +
 geom_point(colour = "purple") +
 geom_hline(yintercept = 0) +
@@ -624,14 +690,14 @@ An attempt to address the heteroscedasticity, in addition to any other assumptio
 
 
 
-## NORMALITY
+## Normality Assumption
 
 The multiple linear regression analysis requires that the errors between observed and predicted values (i.e., the residuals of the regression) should be normally distributed.
 
 A histogram and q-q plot were developed to check if the residuals were normally distributed or not.
 
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 ggplot(data=boston_data, aes(residuals(higher_order_interaction_model_2))) +
 geom_histogram(breaks = seq(-1,1,by=0.1), col="green3", fill="green4") +
 labs(title="Histogram for residuals") +
@@ -639,25 +705,25 @@ labs(x="residuals", y="Count")
 ```
 
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 ggplot(boston_data, aes(sample=higher_order_interaction_model_2$residuals)) +
 stat_qq() + stat_qq_line()
 ```
 
 Based on the plots above, it appears the residuals are not normal. 
+A **Shapiro-Wilk test** was conducted to assess whether the residuals from the model are normally distributed.
 
-A Shapiro-Wilk normality statistical test was also conducted to confirm that the residuals are not normally distributed
+### Hypotheses
 
-Hypotheses
 $$
 \begin{aligned}
-H_0:&\mbox{ the sample data are significantly normally distributed}\\
-H_a:&\mbox{ the sample data are not significantly normally distributed } \\
+H_0\!: & \text{ The residuals are normally distributed} \\
+H_a\!: & \text{ The residuals are not normally distributed}
 \end{aligned}
 $$
 
-```{r}
-#Testing for Normality
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 shapiro.test(residuals(higher_order_interaction_model_2))
 ```
 
@@ -666,12 +732,16 @@ The p-value of the Shapiro-Wilk normality test is less than 0.05 (4.088e-13), so
 An attempt to address the normality will be done after testing all other assumptions.
 
 
-## OUTLIERS
+\
+\
+\
+
+## Outliers
 The below approaches were explored to find and evaluate outliers or influential points.
 
 1. Residuals vs Leverage Plot
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 plot(higher_order_interaction_model_2, 5)
 ```
 
@@ -679,7 +749,7 @@ The plot above shows that all cases are well inside of the Cook’s distance lin
 
 2. Cook’s Distance
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 plot(higher_order_interaction_model_2,pch=18,col="red",which=c(4))
 ```
 
@@ -688,24 +758,22 @@ Based on the consensus that a value of more than 1 indicates an influential valu
 
 3. Leverage points
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 lev=hatvalues(higher_order_interaction_model_2)
 p = length(coef(higher_order_interaction_model_2))
 n = nrow(boston_data)
 outlier2p = lev[lev>(2*p/n)]
 outlier3p = lev[lev>(3*p/n)]
 print("h_I>2p/n, outliers are")
-
 print(outlier2p)
 ```
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 print("h_I>3p/n, outliers are")
-
 print(outlier3p)
 ```
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 plot(rownames(boston_data),lev, main = "Leverage in Boston Housing Dataset", xlab="observation", ylab = "Leverage Value")
 abline(h = 2 *p/n, lty = 1)
 abline(h = 3 *p/n, lty = 1)
@@ -714,35 +782,80 @@ abline(h = 3 *p/n, lty = 1)
 Based on the above plot, it appears we have high leverage points but none of them appear to be particularly influential (no points with a concerning cooks distance). Hence, it appears we do not have any outliers that could pose problems.
 
 
-
-
 ## Dealing with Heteroscedasticity and Normality
 Now that all multiple regression assumptions have been tested to check if the model is trustworthy, we then made attempts to address the heteroscedasticity and lack of normality. 
 
 We started by making a log transformation of the predictor so the difference between big and small numbers relatively becomes small.
 
-```{r}
-higher_order_interaction_model_log = lm(formula = log(medv) ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
-summary(higher_order_interaction_model_log)
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+higher_order_interaction_model_log <- lm(
+  formula = log(medv) ~ crim + I(crim^2) + chas + nox + I(nox^2) + rm + I(rm^2) +
+    dis + I(dis^2) + rad + tax + ptratio + b + lstat + I(lstat^2) + I(lstat^3) +
+    I(lstat^4) + I(lstat^5) + crim:chas + crim:rad + crim:tax + chas:nox +
+    chas:rm + nox:rad + rm:dis + rm:ptratio + dis:rad + dis:lstat + b:lstat,
+  data = boston_data
+)
+
+log_model_summary <- summary(higher_order_interaction_model_log)
+log_model_coef_table <- as.data.frame(log_model_summary$coefficients)
+
+knitr::kable(
+  log_model_coef_table,
+  digits = 4,
+  caption = "Coefficient Estimates from the Log-Transformed Higher-Order Interaction Model"
+)
+
+invisible(capture.output(summary(higher_order_interaction_model_log)))
 ```
 Some insignificant variables were observed after the log transformation, which were subsequently dropped from the model
 
-```{r}
-higher_order_interaction_model_log_2 = lm(formula = log(medv) ~ crim + I(crim^2) + chas + nox+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio + dis:lstat, data = boston_data)
-summary(higher_order_interaction_model_log_2)
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+higher_order_interaction_model_log_2 <- lm(
+  formula = log(medv) ~ crim + I(crim^2) + chas + nox + rm + I(rm^2) +
+    dis + I(dis^2) + rad + tax + ptratio + b + lstat + I(lstat^2) +
+    I(lstat^3) + I(lstat^4) + crim:chas + crim:rad + crim:tax +
+    chas:nox + chas:rm + nox:rad + rm:dis + rm:ptratio + dis:lstat,
+  data = boston_data
+)
+
+log_model_2_summary <- summary(higher_order_interaction_model_log_2)
+log_model_2_coef_table <- as.data.frame(log_model_2_summary$coefficients)
+
+knitr::kable(
+  log_model_2_coef_table,
+  digits = 4,
+  caption = "Coefficient Estimates from the Final Reduced Log-Transformed Model"
+)
+
+invisible(capture.output(summary(higher_order_interaction_model_log_2)))
 ```
 
 The log-transformed model was tested for homoscedasticity and normality. 
 
-```{r}
-#Testing for Homoscedasticity
-bptest(higher_order_interaction_model_log_2)
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+higher_order_interaction_model_log_2 <- lm(
+  formula = log(medv) ~ crim + I(crim^2) + chas + nox + rm + I(rm^2) +
+    dis + I(dis^2) + rad + tax + ptratio + b + lstat + I(lstat^2) + I(lstat^3) +
+    I(lstat^4) + crim:chas + crim:rad + crim:tax + chas:nox + chas:rm +
+    nox:rad + rm:dis + rm:ptratio + dis:lstat,
+  data = boston_data
+)
+
+log_model_2_summary <- summary(higher_order_interaction_model_log_2)
+log_model_2_coef_table <- as.data.frame(log_model_2_summary$coefficients)
+
+knitr::kable(
+  log_model_2_coef_table,
+  digits = 4,
+  caption = "Coefficient Estimates from the Reduced Log-Transformed Higher-Order Interaction Model"
+)
+
+invisible(capture.output(summary(higher_order_interaction_model_log_2)))
 ```
 
 The p-value of the Breusch-Pagan test is less than 0.05 (4.085e-07), indicating we still have heteroscedasticity. 
 
-```{r}
-#Testing for Normality
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 shapiro.test(residuals(higher_order_interaction_model_log_2))
 ```
 
@@ -750,33 +863,47 @@ The p-value of the Shapiro-Wilk normality test is less than 0.05 (9.614e-12), so
 
 Since the log-transformation approach did not resolve the heteroscedasticity or lack of normality, we then explored the Box-Cox transformations approach by identifying $\hat{\lambda}$, the maximum likelihood estimate of $\lambda$ to use in the power transformation
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 bc=boxcox(higher_order_interaction_model_2,lambda=seq(-1,1))
 ```
 
 
-```{r}
-#extract best lambda
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 bestlambda=bc$x[which(bc$y==max(bc$y))]
 bestlambda
 ```
 
 The best lambda estimate was then used to transform the model as follows:
 
-```{r}
-higher_order_interaction_model_2_box = lm(formula = (((medv^0.4949495)-1)/0.4949495) ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ dis:rad + dis:lstat+ b:lstat, data = boston_data)
-summary(higher_order_interaction_model_2_box)
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+higher_order_interaction_model_2_box <- lm(
+  formula = (((medv^0.4949495)-1)/0.4949495) ~ crim + I(crim^2) + chas + nox + I(nox^2) +
+    rm + I(rm^2) + dis + I(dis^2) + rad + tax + ptratio + b + lstat + I(lstat^2) +
+    I(lstat^3) + I(lstat^4) + I(lstat^5) + crim:chas + crim:rad + crim:tax +
+    chas:nox + chas:rm + nox:rad + rm:dis + rm:ptratio + dis:rad + dis:lstat + b:lstat,
+  data = boston_data
+)
+
+box_model_summary <- summary(higher_order_interaction_model_2_box)
+box_model_coef_table <- as.data.frame(box_model_summary$coefficients)
+
+knitr::kable(
+  box_model_coef_table,
+  digits = 4,
+  caption = "Coefficient Estimates from the Box-Cox Transformed Higher-Order Interaction Model"
+)
+
+invisible(capture.output(summary(higher_order_interaction_model_2_box)))
 ```
 
 The best lambda transformed model was then tested for homoscedasticity and normality. 
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 bptest(higher_order_interaction_model_2_box)
 ```
 The p-value of the Breusch-Pagan test is less than 0.05 (5.277e-05), indicating we still have heteroscedasticity. 
 
-```{r}
-#Testing for Normality
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 shapiro.test(residuals(higher_order_interaction_model_2_box))
 ```
 
@@ -786,64 +913,114 @@ The p-value of the Shapiro-Wilk normality test is less than 0.05 (5.297e-10), so
 Since the box-cox transformation approach did not resolve the heteroscedasticity or lack of normality also, we then explored the weighted least squares regression method, which is an application of the more general concept of generalized least squares. This method gives less weight to observations with high variance as follows:
 
 
-```{r}
-#Determine absolute residuals
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 resid = resid(higher_order_interaction_model_2)
 ```
 
-```{r}
-#Fit a model to the residuals to model the variance pattern
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 resid_model = lm(formula = log(resid^2) ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5), data = boston_data)
 ```
 
-```{r}
-#Create weights using fitted variances
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 fitted_var = exp(fitted(resid_model))
 weights = 1 / fitted_var
 ```
 
 
-```{r}
-#Re-fit the model with weights
-higher_order_interaction_model_wls = lm(formula = medv ~ crim + I(crim^2) + chas + nox + I(nox^2)+ rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio+ dis:rad + dis:lstat+ b:lstat, data = boston_data, weights = weights)
-summary(higher_order_interaction_model_wls)
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+higher_order_interaction_model_wls <- lm(
+  formula = medv ~ crim + I(crim^2) + chas + nox + I(nox^2) +
+    rm + I(rm^2) + dis + I(dis^2) + rad + tax + ptratio + b + lstat +
+    I(lstat^2) + I(lstat^3) + I(lstat^4) + I(lstat^5) +
+    crim:chas + crim:rad + crim:tax + chas:nox + chas:rm + nox:rad +
+    rm:dis + rm:ptratio + dis:rad + dis:lstat + b:lstat,
+  data = boston_data,
+  weights = weights
+)
+
+wls_model_summary <- summary(higher_order_interaction_model_wls)
+wls_model_coef_table <- as.data.frame(wls_model_summary$coefficients)
+
+knitr::kable(
+  wls_model_coef_table,
+  digits = 4,
+  caption = "Coefficient Estimates from the Weighted Least Squares (WLS) Model"
+)
+
+invisible(capture.output(summary(higher_order_interaction_model_wls)))
 ```
 
 Some insignificant variables were observed, which were subsequently dropped from the model
 
-```{r}
-higher_order_interaction_model_wls_2 = lm(formula = medv ~ crim + I(crim^2) + chas + nox + rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + nox:rad + rm:dis + rm:ptratio + dis:lstat+ b:lstat, data = boston_data, weights = weights)
-summary(higher_order_interaction_model_wls_2)
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+higher_order_interaction_model_wls_2 <- lm(
+  formula = medv ~ crim + I(crim^2) + chas + nox + rm + I(rm^2) +
+    dis + I(dis^2) + rad + tax + ptratio + b + lstat + I(lstat^2) +
+    I(lstat^3) + I(lstat^4) + I(lstat^5) + crim:chas + crim:rad +
+    crim:tax + chas:nox + chas:rm + nox:rad + rm:dis + rm:ptratio +
+    dis:lstat + b:lstat,
+  data = boston_data,
+  weights = weights
+)
+
+wls_model_2_summary <- summary(higher_order_interaction_model_wls_2)
+wls_model_2_coef_table <- as.data.frame(wls_model_2_summary$coefficients)
+
+knitr::kable(
+  wls_model_2_coef_table,
+  digits = 4,
+  caption = "Coefficient Estimates from the Final Weighted Least Squares (WLS) Model"
+)
+
+invisible(capture.output(summary(higher_order_interaction_model_wls_2)))
 ```
+
 A further insignificant variables was observed, which was also dropped from the model
 
-```{r}
-higher_order_interaction_model_wls_3 = lm(formula = medv ~ crim + I(crim^2) + chas + nox + rm+ I(rm^2)+ dis + I(dis^2)+ rad + tax + ptratio + b + lstat + I(lstat^2)+ I(lstat^3)+ I(lstat^4)+ I(lstat^5) + crim:chas  +crim:rad+ crim:tax + chas:nox +chas:rm + rm:dis + rm:ptratio + dis:lstat+ b:lstat, data = boston_data, weights = weights)
-summary(higher_order_interaction_model_wls_3)
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+higher_order_interaction_model_wls_3 <- lm(
+  formula = medv ~ crim + I(crim^2) + chas + nox + rm + I(rm^2) +
+    dis + I(dis^2) + rad + tax + ptratio + b + lstat + I(lstat^2) +
+    I(lstat^3) + I(lstat^4) + I(lstat^5) + crim:chas + crim:rad +
+    crim:tax + chas:nox + chas:rm + rm:dis + rm:ptratio + dis:lstat +
+    b:lstat,
+  data = boston_data,
+  weights = weights
+)
+
+wls_model_3_summary <- summary(higher_order_interaction_model_wls_3)
+wls_model_3_coef_table <- as.data.frame(wls_model_3_summary$coefficients)
+
+knitr::kable(
+  wls_model_3_coef_table,
+  digits = 4,
+  caption = "Coefficient Estimates from the Final Reduced WLS Model"
+)
+
+invisible(capture.output(summary(higher_order_interaction_model_wls_3)))
 ```
 The model derived from the weighted least squares regression method was tested for homoscedasticity and normality.
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 bptest(higher_order_interaction_model_wls_3)
 ```
 
 The p-value of the Breusch-Pagan test is greater than 0.05 (0.9934), indicating we now finally have homoscedasticity. 
 
-```{r}
-#Testing for Normality
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 shapiro.test(residuals(higher_order_interaction_model_wls_3))
 ```
 
 The p-value of the Shapiro-Wilk normality test is less than 0.05 (9.614e-12), indicating we still do not have normality.
 
-
+Even though we do not have normality, due to our dataset having a large sample size, the Central Limit Theorem can compensate for the non-normality in the residuals. The Central Limit Theorem states that, for a sufficiently large sample from a population, the sampling distribution of the estimates tends to be normal, regardless of the underlying population distribution. This suggests that the residuals do not need to be perfectly normal.
 
 
 The linearity and outliers assumptions would be tested again to confirm they are still met
 
 # Linearity Assumption
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 ggplot(higher_order_interaction_model_wls_3, aes(x=.fitted, y=.resid)) +
 geom_point(colour = "purple") +
 geom_hline(yintercept = 0) +
@@ -853,7 +1030,7 @@ ggtitle("Residual plot: Residual vs Fitted values")
 
 Based on the updated model, there appears to be no pattern of the residuals at all, indicating that the model still passes the linearity assumption that there is a straight-line (linear) relationship between the predictors and the response.
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 ggplot(higher_order_interaction_model_wls_3, aes(x=.fitted, y=.resid)) +
 geom_point() +geom_smooth()+
 geom_hline(yintercept = 0)
@@ -864,7 +1041,7 @@ geom_hline(yintercept = 0)
 
 1. Residuals vs Leverage Plot
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 plot(higher_order_interaction_model_wls_3, 5)
 ```
 
@@ -872,7 +1049,7 @@ The plot above shows that all cases are well inside of the Cook’s distance lin
 
 2. Cook’s Distance
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 plot(higher_order_interaction_model_wls_3,pch=18,col="red",which=c(4))
 ```
 
@@ -881,7 +1058,7 @@ Based on the consensus that a value of more than 1 indicates an influential valu
 
 3. Leverage points
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 lev=hatvalues(higher_order_interaction_model_2)
 p = length(coef(higher_order_interaction_model_2))
 n = nrow(boston_data)
@@ -892,13 +1069,13 @@ print("h_I>2p/n, outliers are")
 print(outlier2p)
 ```
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 print("h_I>3p/n, outliers are")
 
 print(outlier3p)
 ```
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 plot(rownames(boston_data),lev, main = "Leverage in Boston Housing Dataset", xlab="observation", ylab = "Leverage Value")
 abline(h = 2 *p/n, lty = 1)
 abline(h = 3 *p/n, lty = 1)
@@ -909,34 +1086,50 @@ Based on the above plot, it appears we still have high leverage points but none 
 
 # 4. CONCLUSION AND DISCUSSION
 
-We developed a predictive model using multiple linear regression to estimate the median value of owner-occupied homes in Boston based on 13 housing and neighborhood features. After loading the data, we tested for multicollinearity; where none was detected. Next, we built a baseline additive model and refined it by removing insignificant predictors. Afterwards, Interaction effects were explored, and a reduced interaction model was selected based on significance and model performance. Then we explored higher order terms to capture non-linear relationships, and we iteratively refined the model to retain only the significant predictors. Finally we tested the multiple regression assumptions: which included linearity, independence, equal variance, normality, and outliers. While the final model met most assumptions, the residuals remained non-normal despite attempts with log, Box-Cox, and weighted least squares transformations. Ultimately, the weighted least squares regression model was selected as the final model, as it effectively treated heteroscedasticity, improved model interpretability, and maintained linearity and robustness against outliers. This comprehensive modeling process provided insights into key factors influencing housing prices, our final predictive model is: 
+We developed a predictive model using **multiple linear regression** to estimate the median value of owner-occupied homes in Boston based on 13 housing and neighborhood features. After loading the data, we tested for **multicollinearity**, and none was detected.
 
-$\hat{medv} = 72.03-6.281crim+0.003005I(crim^2)+24.61chas-15.37nox-12.46rm+1.827I(rm^2)-7.739dis+0.1715I(dis^2)+0.3466rad-0.01298tax+2.704ptratio+0.01990b-4.951lstat+0.5050I(lstat^2)-0.02711I(lstat^3)+0.0006835I(lstat^4)-0.000006415I(lstat^5)+1.485crim:chas-0.3624crim:rad+0.02194crim:tax-22.75chas:nox-1.872chas:rm+0.6587rm:dis-0.5220rm:ptratio+0.09832dis:lstat-0.0006878b:lstat$
+We then built a **baseline additive model** and refined it by removing insignificant predictors. Interaction effects were explored, and a **reduced interaction model** was selected based on predictor significance and model performance. Next, we examined **higher-order terms** to capture non-linear relationships, iteratively refining the model to retain only statistically significant predictors.
+
+Finally, we tested the **multiple regression assumptions**—linearity, independence, equal variance, normality, and presence of outliers. While the final model satisfied most assumptions, the **residuals remained non-normal** despite attempts to correct this using log transformation, Box-Cox transformation, and **weighted least squares (WLS)** regression.
+
+Ultimately, the **WLS model** was selected as the final model for its ability to address **heteroscedasticity**, improve model **interpretability**, and maintain both **linearity** and **robustness to outliers**. This comprehensive modeling process revealed key factors influencing housing prices. 
+
+**The final predictive model is**:
+
+$$
+\begin{aligned}
+\hat{medv}_i =\ & 72.03 - 6.281 \cdot crim_i + 0.003005 \cdot I(crim_i^2) + 24.61 \cdot chas_i - 15.37 \cdot nox_i \\
+& - 12.46 \cdot rm_i + 1.827 \cdot I(rm_i^2) - 7.739 \cdot dis_i + 0.1715 \cdot I(dis_i^2) \\
+& + 0.3466 \cdot rad_i - 0.01298 \cdot tax_i + 2.704 \cdot ptratio_i + 0.01990 \cdot b_i \\
+& - 4.951 \cdot lstat_i + 0.5050 \cdot I(lstat_i^2) - 0.02711 \cdot I(lstat_i^3) + 0.0006835 \cdot I(lstat_i^4) \\
+& - 0.000006415 \cdot I(lstat_i^5) + 1.485 \cdot crim_i \cdot chas_i - 0.3624 \cdot crim_i \cdot rad_i \\
+& + 0.02194 \cdot crim_i \cdot tax_i - 22.75 \cdot chas_i \cdot nox_i - 1.872 \cdot chas_i \cdot rm_i \\
+& + 0.6587 \cdot rm_i \cdot dis_i - 0.5220 \cdot rm_i \cdot ptratio_i + 0.09832 \cdot dis_i \cdot lstat_i \\
+& - 0.0006878 \cdot b_i \cdot lstat_i
+\end{aligned}
+$$
+where $chas_{i}$ is 1 if the tract bounds Charles River and 0 if otherwise
+
+**Key predictors** of the median home value (\$1000s) include:  
+`crim`, `I(crim^2)`, `chas`, `nox`, `rm`, `I(rm^2)`, `dis`, `I(dis^2)`, `rad`, `tax`, `ptratio`, `b`, `lstat`, `I(lstat^2)`, `I(lstat^3)`, `I(lstat^4)`, `I(lstat^5)`, `crim:chas`, `crim:rad`, `crim:tax`, `chas:nox`, `chas:rm`, `rm:dis`, `rm:ptratio`, `dis:lstat`, and `b:lstat`.
 
 
-Based off of this, the key factors that predict the median value (in thousands of dollars) are: 
 
-crim, I(crim^2), chas, nox, rm, I(rm^2), dis, I(dis^2), rad, tax, ptratio, b, lstat, I(lstat^2), I(lstat^3), I(lstat^4), I(lstat^5), crim:chas, crim:rad, crim:tax, chas:nox, chas:rm, rm:dis, rm:ptratio, dis:lstat, b:lstat
-
-
-
-4.1 Approach
+### 4.1 Approach
 The approach we took does seem logically sound. Starting with a basic multiple linear regression model allowed us to build a strong baseline and interpret the effects of various predictors on housing prices. Looking at interaction terms and higher-order relationships enabled us to improve model complexity effectively. Additionally, testing each of the regression assumptions step-by-step ensured that our final model would be valid statistically. Some issues we had were that there was consistent violation of the normality assumption, even with various transformations. Possibilities for improvement are possibly running non-linear or machine learning models. They may be able to handle normality and allow us to create a better predictive model. 
 
 
-4.2 Future Work
-
-
-
-
-
+### 4.2 Future Work
+In the future, we could explore using machine learning models to improve prediction accuracy. These models may be able to capture more complex patterns in the data and might perform better than traditional linear regression. All in all, they could be a valuable next step in our analysis.
 
 
 
 
 
 # 5. REFERENCES
-[1] - Dataset description
+[1] Prabhakaran, Selva. Boston Housing Dataset. GitHub, https://www.kaggle.com/code/prasadperera/the-boston-housing-dataset. Accessed 30 Mar. 2025.
+
+[2] Lipman, Danika. Data603: Statistical Modelling with Data. University of Calgary, 2025, https://d2l.ucalgary.ca/d2l/le/content/648044/viewContent/6885027/View.
 
 
 
